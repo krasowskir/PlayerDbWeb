@@ -5,6 +5,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -18,16 +19,35 @@ public class MeinServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("=== params ===");
-        Map<String, String[]> params = req.getParameterMap();
-        Set<String> paramKeys = params.keySet();
-        paramKeys.forEach(k -> System.out.println("name: " + k + " values: " + Arrays.toString(params.get(k))));
+        req.getParameterMap()
+                .forEach((key, value) -> System.out.println("name: " + key + " values: " + Arrays.toString(value)));
 
-        System.out.println("=== header ===");
+        System.out.println("=== header ==="); //deprecated shit
         Enumeration<String> headers = req.getHeaderNames();
         Iterator<String> headerIter = headers.asIterator();
-        while (headerIter.hasNext()){
+        while (headerIter.hasNext()) {
             String header = headerIter.next();
             System.out.println("header: " + header + " value: " + req.getHeader(header));
+        }
+
+        System.out.println("=== session info ===");
+        Random rand = new Random();
+        HttpSession session = req.getSession();
+        String sessVal = "";
+        if (req.getParameter("clear") != null) {
+            session.invalidate();
+        } else {
+            Enumeration<String> sessNames = session.getAttributeNames();
+
+            if (!sessNames.hasMoreElements()) {
+                System.out.println("session contains no information!");
+                sessVal = "sess-" + rand.nextInt(10000);
+                session.setAttribute("richSession", sessVal);
+            } else {
+                String name = sessNames.nextElement();
+                sessVal = session.getAttribute(name).toString();
+                System.out.println("session name: " + name + " value: " + sessVal);
+            }
         }
 
         OutputStream out = resp.getOutputStream();
@@ -35,13 +55,13 @@ public class MeinServlet extends HttpServlet {
 
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
-            out.write(Files.readAllBytes(Path.of(getServletContext().getResource("/WEB-INF/classes/index.html").toURI())));
+            String content = new String(Files.readAllBytes(Path.of(getServletContext().getResource("/WEB-INF/classes/index.html").toURI())));
+            out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
             out.flush();
         } catch (URISyntaxException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.write("error".getBytes());
             out.flush();
-            e.printStackTrace();
         }
     }
 
