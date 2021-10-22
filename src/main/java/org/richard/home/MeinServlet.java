@@ -2,10 +2,7 @@ package org.richard.home;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -47,6 +44,20 @@ public class MeinServlet extends HttpServlet {
                 String name = sessNames.nextElement();
                 sessVal = session.getAttribute(name).toString();
                 System.out.println("session name: " + name + " value: " + sessVal);
+
+            }
+        }
+
+        if (req.getParameter("setcookie") != null){
+            Cookie cookie = new Cookie("myCookie", "richard-123");
+            cookie.setMaxAge(30);
+            resp.addCookie(cookie);
+        } else {
+            Cookie[] cookies = req.getCookies();
+            if (cookies == null || cookies.length == 0){
+                System.out.println("no cookies found");
+            } else {
+                System.out.println("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue() );
             }
         }
 
@@ -82,4 +93,6 @@ public class MeinServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.doDelete(req, resp);
     }
+
+
 }
