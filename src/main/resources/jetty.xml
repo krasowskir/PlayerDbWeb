@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
+
+<Configure id="server" class="org.eclipse.jetty.server.Server">
+    <New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Call name="addCustomizer">
+            <Arg> <New class="org.eclipse.jetty.server.SecureRequestCustomizer"/> </Arg>
+        </Call>
+    </New>
+
+    <New id="http11" class="org.eclipse.jetty.server.HttpConnectionFactory" >
+        <Arg> <Ref refid="httpConfig" /> </Arg>
+    </New>
+
+    <New id="connFac" class="org.eclipse.jetty.server.SslConnectionFactory">
+        <Arg> <Ref id="sslConFactory" refid="sslServerFactory"/> </Arg>
+        <Arg> <Call name="getProtocol" arg="http11"/> </Arg>
+    </New>
+
+    <New id="serverConnector" class="org.eclipse.jetty.server.ServerConnector">
+        <Arg> <Ref refid="server" /> </Arg>
+        <Arg> <Ref refid="connFac"/> </Arg>
+        <Arg> <Ref refid="http11" /> </Arg>
+        <Set name="port">8443</Set>
+    </New>
+
+    <Call name="addConnector">
+        <Arg> <Ref refid="serverConnector"/> </Arg>
+    </Call>
+</Configure>
+
+
+
+

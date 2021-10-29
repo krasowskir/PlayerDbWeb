@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @ServletSecurity(
-   @HttpConstraint(rolesAllowed = { "secretagent" })
+   @HttpConstraint(rolesAllowed = { "secretagent" },transportGuarantee = ServletSecurity.TransportGuarantee.CONFIDENTIAL)
 )
 @WebServlet("/secure")
 public class SecureHelloClient extends HttpServlet {
