@@ -2,4 +2,5 @@ target
 PlayerDbWeb.iml
 pom.xml.versionsBackup
 .idea
-WEB-INF
+WEB-INF/*
+META-INF/*

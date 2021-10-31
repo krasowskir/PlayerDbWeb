@@ -1,5 +1,8 @@
 package org.richard.home;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -18,10 +21,11 @@ import java.nio.file.Path;
 )
 @WebServlet("/secure")
 public class SecureHelloClient extends HttpServlet {
+    Logger log = LoggerFactory.getLogger(SecureHelloClient.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("=== accessed secure area === ");
+        log.info("=== accessed secure area === ");
         OutputStream out = resp.getOutputStream();
         resp.setContentType("text/html");
         resp.setStatus(HttpServletResponse.SC_OK);
@@ -30,7 +34,7 @@ public class SecureHelloClient extends HttpServlet {
             out.write(new StringBuilder(content).toString().getBytes());
             out.flush();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error(e.toString());
         }
     }
 }
