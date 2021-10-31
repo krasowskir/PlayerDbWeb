@@ -1,5 +1,9 @@
 package org.richard.home;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactoryFriend;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -13,13 +17,15 @@ import java.util.*;
 @WebServlet(urlPatterns = "/mein")
 public class MeinServlet extends HttpServlet {
 
+    Logger log = LoggerFactory.getLogger(MeinServlet.class);
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("=== params ===");
+        log.info("=== params ===");
         req.getParameterMap()
-                .forEach((key, value) -> System.out.println("name: " + key + " values: " + Arrays.toString(value)));
+                .forEach((key, value) -> log.debug("name: " + key + " values: " + Arrays.toString(value)));
 
-        System.out.println("=== header ==="); //deprecated shit
+        log.debug("=== header ==="); //deprecated shit
         Enumeration<String> headers = req.getHeaderNames();
         Iterator<String> headerIter = headers.asIterator();
         while (headerIter.hasNext()) {
@@ -27,7 +33,7 @@ public class MeinServlet extends HttpServlet {
             System.out.println("header: " + header + " value: " + req.getHeader(header));
         }
 
-        System.out.println("=== session info ===");
+        log.info("=== session info ===");
         Random rand = new Random();
         HttpSession session = req.getSession();
         String sessVal = "";
@@ -55,9 +61,9 @@ public class MeinServlet extends HttpServlet {
         } else {
             Cookie[] cookies = req.getCookies();
             if (cookies == null || cookies.length == 0){
-                System.out.println("no cookies found");
+                log.debug("no cookies found");
             } else {
-                System.out.println("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue() );
+                log.debug("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue() );
             }
         }
 

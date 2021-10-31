@@ -2,6 +2,7 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
+
     <Call name="addConnector">
         <Arg>
             <New id="serverConnector" class="org.eclipse.jetty.server.ServerConnector">
@@ -25,8 +26,6 @@
                         <Item>
                             <New class="org.eclipse.jetty.server.HttpConnectionFactory">
                                 <New class="org.eclipse.jetty.server.HttpConfiguration">
-                                    <Set name="secureScheme" property="jetty.httpConfig.secureScheme"/>
-                                    <Set name="securePort" property="jetty.httpConfig.securePort"/>
                                     <Call name="addCustomizer">
                                         <Arg>
                                             <New class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
@@ -37,8 +36,10 @@
                         </Item>
                     </Array>
                 </Arg>
+                <Set name="port" type="int">443</Set>
             </New>
         </Arg>
+
     </Call>
 </Configure>
 
