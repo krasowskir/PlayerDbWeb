@@ -1,9 +1,11 @@
 package org.richard.home;
 
+import org.richard.home.service.PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.LoggerFactoryFriend;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -18,6 +20,18 @@ import java.util.*;
 public class MeinServlet extends HttpServlet {
 
     Logger log = LoggerFactory.getLogger(MeinServlet.class);
+
+    private PlayerService playerService;
+
+    public MeinServlet() { }
+
+    public PlayerService getPlayerService() {
+        return playerService;
+    }
+
+    public void setPlayerService(PlayerService playerService) {
+        this.playerService = playerService;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -65,6 +79,10 @@ public class MeinServlet extends HttpServlet {
             } else {
                 log.debug("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue() );
             }
+        }
+
+        if (req.getParameter("player") != null){
+
         }
 
         OutputStream out = resp.getOutputStream();
