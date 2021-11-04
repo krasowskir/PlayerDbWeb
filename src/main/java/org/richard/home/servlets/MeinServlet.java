@@ -1,13 +1,12 @@
-package org.richard.home;
+package org.richard.home.servlets;
 
+import org.richard.home.model.Player;
 import org.richard.home.service.PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactoryFriend;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,14 +15,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@WebServlet(urlPatterns = "/mein")
+@Component
 public class MeinServlet extends HttpServlet {
 
     Logger log = LoggerFactory.getLogger(MeinServlet.class);
 
     private PlayerService playerService;
 
-    public MeinServlet() { }
+    public MeinServlet() {
+    }
 
     public PlayerService getPlayerService() {
         return playerService;
@@ -68,21 +68,22 @@ public class MeinServlet extends HttpServlet {
             }
         }
 
-        if (req.getParameter("setcookie") != null){
+        if (req.getParameter("setcookie") != null) {
             Cookie cookie = new Cookie("myCookie", "richard-123");
             cookie.setMaxAge(30);
             resp.addCookie(cookie);
         } else {
             Cookie[] cookies = req.getCookies();
-            if (cookies == null || cookies.length == 0){
+            if (cookies == null || cookies.length == 0) {
                 log.debug("no cookies found");
             } else {
-                log.debug("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue() );
+                log.debug("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue());
             }
         }
-
-        if (req.getParameter("player") != null){
-
+        Player foundPlayer = null;
+        if (req.getParameter("player") != null) {
+            foundPlayer = playerService.fetchSinglePlayer(req.getParameter("player"));
+            log.debug("found player {} in servlet", foundPlayer);
         }
 
         OutputStream out = resp.getOutputStream();
@@ -91,8 +92,13 @@ public class MeinServlet extends HttpServlet {
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
             String content = new String(Files.readAllBytes(Path.of(getServletContext().getResource("/WEB-INF/classes/index.html").toURI())));
-            out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
-            out.flush();
+            if (foundPlayer != null) {
+                out.write(new StringBuilder(content).insert(173, foundPlayer.toString()).toString().getBytes());
+                out.flush();
+            } else {
+                out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
+                out.flush();
+            }
         } catch (URISyntaxException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.write("error".getBytes());

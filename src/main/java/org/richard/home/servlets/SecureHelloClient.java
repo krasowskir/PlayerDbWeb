@@ -1,7 +1,8 @@
-package org.richard.home;
+package org.richard.home.servlets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Component
 @ServletSecurity(
     @HttpConstraint(rolesAllowed = { "secretagent" },transportGuarantee = ServletSecurity.TransportGuarantee.CONFIDENTIAL)
 )

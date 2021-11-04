@@ -5,8 +5,16 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+<!--    <logger name="org.eclipse.jetty" level="debug">-->
+<!--        <appender-ref ref="richOut" />-->
+<!--    </logger>-->
+
+    <logger name="org.richard.home" level="debug">
         <appender-ref ref="richOut" />
+    </logger>
+
+    <root level="OFF">
+<!--        <appender-ref ref="richOut" />-->
     </root>
 
 
