@@ -3,6 +3,8 @@ package org.richard.home.dao;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -19,27 +21,26 @@ public class PostgresPlayerDAO implements PlayerDAO {
     private static final String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS where vorname = ?";
 
     private DataSource dataSource;
-    private String username, password;
 
-    public PostgresPlayerDAO(DataSource dataSource) {
+    @Autowired
+    public PostgresPlayerDAO(@Qualifier("hikariDataSource") DataSource dataSource) {
         log.debug("constructor with dataSource {}", dataSource);
         this.dataSource = dataSource;
     }
 
     @Override
     public Player getPlayer(String name) {
-        try {
-            log.debug("entering getPlayer with name {}", name);
-            Connection con = this.dataSource.getConnection();
+        log.debug("entering getPlayer with name {}", name);
+        try (Connection con = this.dataSource.getConnection()) {
             log.debug("connection to db: {}", !con.isClosed());
-            PreparedStatement preparedStatement = con.prepareStatement(FIND_PLAYER_BY_NAME);
-            preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return mapResultSetToPlayer(resultSet);
+            try (PreparedStatement preparedStatement = con.prepareStatement(FIND_PLAYER_BY_NAME)){
+                preparedStatement.setString(1, name);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                return mapResultSetToPlayer(resultSet);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return new Player(0, "unknown");
     }
 

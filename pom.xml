@@ -68,6 +68,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+
+<!--        testing-->
+        <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
             <version>2.0-groovy-3.0</version>
@@ -145,6 +152,23 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>8.0.0</version>
+                <configuration>
+                    <url>jdbc:postgresql://localhost:5432/playerdb</url>
+                    <user>richard</user>
+                    <password>test123</password>
+                    <driver>org.postgresql.Driver</driver>
+                    <baselineOnMigrate>true</baselineOnMigrate>
+                    <validateMigrationNaming>true</validateMigrationNaming>
+                    <locations>
+                        <location>classpath:db/migration</location>
+                    </locations>
                 </configuration>
             </plugin>
 

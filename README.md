@@ -26,3 +26,12 @@ docker logs -f jetty-cont
 ```
 curl -i -X GET http://localhost:8080/playerdbweb/mein
 ```
+
+
+## Database
+
+### checking current user
+`\conninfo`
+
+### execute the migration
+`mvn flyway:migrate`
