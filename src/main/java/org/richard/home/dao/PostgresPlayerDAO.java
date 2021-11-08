@@ -18,20 +18,22 @@ import java.util.List;
 public class PostgresPlayerDAO implements PlayerDAO {
     Logger log = LoggerFactory.getLogger(PostgresPlayerDAO.class);
 
-    private static final String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS where vorname = ?";
+    private static final String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS where first_name = ?";
 
-    private DataSource dataSource;
+    private DataSource master;
+    private DataSource slave;
 
     @Autowired
-    public PostgresPlayerDAO(@Qualifier("hikariDataSource") DataSource dataSource) {
-        log.debug("constructor with dataSource {}", dataSource);
-        this.dataSource = dataSource;
+    public PostgresPlayerDAO(@Qualifier("hikariDataSource") DataSource writeDataSource, @Qualifier("readDataSource") DataSource readDataSource) {
+        log.debug("constructor with master dataSource {} and slave {}", master, readDataSource);
+        this.master = writeDataSource;
+        this.slave = readDataSource;
     }
 
     @Override
     public Player getPlayer(String name) {
         log.debug("entering getPlayer with name {}", name);
-        try (Connection con = this.dataSource.getConnection()) {
+        try (Connection con = this.slave.getConnection()) {
             log.debug("connection to db: {}", !con.isClosed());
             try (PreparedStatement preparedStatement = con.prepareStatement(FIND_PLAYER_BY_NAME)){
                 preparedStatement.setString(1, name);
@@ -52,6 +54,6 @@ public class PostgresPlayerDAO implements PlayerDAO {
     private Player mapResultSetToPlayer(ResultSet rs) throws SQLException {
         rs.next();
 
-        return new Player(rs.getInt("ALTER"), rs.getString("VORNAME"));
+        return new Player(rs.getInt("ALTER"), rs.getString("FIRST_NAME"));
     }
 }

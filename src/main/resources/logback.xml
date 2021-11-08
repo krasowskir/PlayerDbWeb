@@ -5,17 +5,24 @@
         </encoder>
     </appender>
 
-<!--    <logger name="org.eclipse.jetty" level="debug">-->
-<!--        <appender-ref ref="richOut" />-->
-<!--    </logger>-->
-
     <logger name="org.richard.home" level="debug">
         <appender-ref ref="richOut" />
     </logger>
 
-    <root level="debug">
+    <logger name="com.zaxxer" level="debug">
         <appender-ref ref="richOut" />
-    </root>
+    </logger>
 
+    <logger name="org.eclipse.jetty" level="debug">
+        <appender-ref ref="richOut" />
+    </logger>
+
+    <logger name="org.postgresql" level="debug">
+        <appender-ref ref="richOut" />
+    </logger>
+
+<!--    <root level="off">-->
+<!--        <appender-ref ref="richOut" />-->
+<!--    </root>-->
 
 </configuration>

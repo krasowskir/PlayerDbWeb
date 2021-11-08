@@ -1,7 +1,6 @@
 package org.richard.home.config;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.postgresql.ds.PGPoolingDataSource;
 import org.richard.home.service.PlayerService;
 import org.richard.home.servlets.MeinServlet;
 import org.slf4j.Logger;

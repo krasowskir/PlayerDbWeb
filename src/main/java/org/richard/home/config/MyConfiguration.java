@@ -27,6 +27,25 @@ public class MyConfiguration {
         return dataSource;
     }
 
+    @Bean(name = "readDataSource")
+    public DataSource readDataSource(){
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setPoolName("cookbook");
+        dataSource.setMaximumPoolSize(10);
+        dataSource.setMinimumIdle(2);
+        dataSource.addDataSourceProperty("cachePrepStmts", Boolean.TRUE);
+        dataSource.addDataSourceProperty("prepStmtCacheSize", 256);
+        dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+        dataSource.addDataSourceProperty("useServerPrepStmts", Boolean.TRUE);
+
+        dataSource.setDriverClassName("org.postgresql.Driver");
+        dataSource.setJdbcUrl("jdbc:postgresql://slave:5432/playerdb");
+        dataSource.setUsername("richard");
+        dataSource.setPassword("test123");
+
+        return dataSource;
+    }
+
     @Bean(name = "dataSourceSingle")
     public DataSource singleThreadDataSource(){
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
