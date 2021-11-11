@@ -3,6 +3,7 @@ package org.richard.home.dao
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
 import org.h2.jdbcx.JdbcDataSource
+import org.richard.home.model.Player
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -28,16 +29,42 @@ class PostgresPlayerDAOSpec extends Specification {
         System.out.println('migration successful?: ' + migrRes.success)
     }
 
-    def 'PostgresPlayerDAO can be instantiated'(){
+
+    def 'player #name can be searched in postgresPlayerDAO'(){
 
         given:
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
+        when: 'calling getPlayer with a name'
+        def found = postgresPlayerDAO.getPlayer(name)
+
+        then: 'always a player is returned'
+        found.name == nameFound
+        found.alter == ageFound
+
+        where: 'name is found name or sometimes unknown'
+        name        |   nameFound       |   ageFound
+        'richard'   |   'richard'       |   30
+        'none'      |   'unknown'       |   0
+        ''          |   'unknown'       |   0
+        null        |   'unknown'       |   0
+    }
+
+    def 'PostgresPlayerDAO can persist a player'(){
+
+        given:
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+
+        and:
+        def player = fromPlayer
+
         when:
-        def found = postgresPlayerDAO.getPlayer('richard')
+        def success = postgresPlayerDAO.savePlayer(player)
 
         then:
-        found.name == 'richard'
-        found.alter == 30
+        success
+
+        where:
+        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
     }
 }

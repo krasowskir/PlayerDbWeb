@@ -184,6 +184,10 @@
                 <configuration>
                     <resources>
                         <resource>
+                            <directory>${basedir}/src/main/resources</directory>
+                            <include>**</include>
+                        </resource>
+                        <resource>
                             <directory>${basedir}</directory>
                             <include>schema.sql</include>
                         </resource>

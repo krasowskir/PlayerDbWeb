@@ -18,15 +18,15 @@ public class PlayerService {
 
     public Player fetchSinglePlayer(String name){
         log.debug("entering fetchSinglePlayer with name {}", name);
-        if (name.trim().equals("")){
+        if (name == null || name.trim().equals("")){
             throw new InvalidInputException("provided name was empty");
         }
-        Player foundPlayer = this.playerDAO.getPlayer(name);
-        log.info("player found {}", foundPlayer);
-        if (foundPlayer.getName().equals("unknown") || foundPlayer == null){
-            throw new NotFoundException(String.format("for Player with name %s no result was found!", name));
-        } else {
+        try {
+            Player foundPlayer = this.playerDAO.getPlayer(name);
+            log.info("player returned {}", foundPlayer);
             return foundPlayer;
+        } catch (NotFoundException ne){
+            return new Player("unknown", 0);
         }
     }
 

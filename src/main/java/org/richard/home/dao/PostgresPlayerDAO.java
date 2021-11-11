@@ -1,5 +1,6 @@
 package org.richard.home.dao;
 
+import org.richard.home.exception.NotFoundException;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +41,12 @@ public class PostgresPlayerDAO implements PlayerDAO {
             try (PreparedStatement preparedStatement = con.prepareStatement(FIND_PLAYER_BY_NAME)) {
                 preparedStatement.setString(1, name);
                 ResultSet resultSet = preparedStatement.executeQuery();
-                return mapResultSetToPlayer(resultSet);
+                return mapResultSetToPlayer(resultSet, name);
             }
         } catch (SQLException e) {
             log.error(e.getClass().getName());
+            throw new NotFoundException(String.format("player %s not found in db",name), e);
         }
-        return new Player("unknown", 0);
     }
 
     @Override
@@ -72,8 +73,10 @@ public class PostgresPlayerDAO implements PlayerDAO {
         return updRows > 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    private Player mapResultSetToPlayer(ResultSet rs) throws SQLException {
-        rs.next();
+    private Player mapResultSetToPlayer(ResultSet rs, String name) throws SQLException {
+        if (!rs.next()){
+            throw new NotFoundException(String.format("player with name %s not found!", name));
+        }
 
         return new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
     }
