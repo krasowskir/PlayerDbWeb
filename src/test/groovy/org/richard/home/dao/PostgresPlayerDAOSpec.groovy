@@ -3,6 +3,7 @@ package org.richard.home.dao
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
 import org.h2.jdbcx.JdbcDataSource
+import org.richard.home.exception.NotFoundException
 import org.richard.home.model.Player
 import spock.lang.Shared
 import spock.lang.Specification
@@ -30,7 +31,7 @@ class PostgresPlayerDAOSpec extends Specification {
     }
 
 
-    def 'player #name can be searched in postgresPlayerDAO'(){
+    def 'a valid player can be searched in postgresPlayerDAO'(){
 
         given:
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
@@ -45,10 +46,23 @@ class PostgresPlayerDAOSpec extends Specification {
         where: 'name is found name or sometimes unknown'
         name        |   nameFound       |   ageFound
         'richard'   |   'richard'       |   30
-        'none'      |   'unknown'       |   0
-        ''          |   'unknown'       |   0
-        null        |   'unknown'       |   0
     }
+
+    def 'player #name throws an Exception in postgresPlayerDAO'(){
+
+        given:
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+
+        when: 'calling getPlayer with a name'
+        def found = postgresPlayerDAO.getPlayer(name)
+
+        then: 'always a player is returned'
+        thrown(NotFoundException)
+
+        where: 'name is found name or sometimes unknown'
+        name << ['none', '', null]
+    }
+
 
     def 'PostgresPlayerDAO can persist a player'(){
 
