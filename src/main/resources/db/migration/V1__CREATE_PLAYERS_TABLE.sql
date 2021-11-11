@@ -18,10 +18,10 @@ create table belongs_to (
     primary key (player_id, team_name)
 );
 
-grant all privileges on table players to richard;
+GRANT ALL ON players TO richard;
 
-insert into players values(DEFAULT, 'richard', 30);
-insert into players values(DEFAULT, 'lidia', 33);
+insert into players values(default, 'richard', 30);
+insert into players values(default, 'lidia', 33);
 
 
 

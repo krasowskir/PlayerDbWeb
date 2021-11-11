@@ -6,9 +6,7 @@ import org.richard.home.exception.NotFoundException;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
 public class PlayerService {
     Logger log = LoggerFactory.getLogger(PlayerService.class);
 
@@ -24,11 +22,23 @@ public class PlayerService {
             throw new InvalidInputException("provided name was empty");
         }
         Player foundPlayer = this.playerDAO.getPlayer(name);
-        log.debug("player found {}", foundPlayer);
+        log.info("player found {}", foundPlayer);
         if (foundPlayer.getName().equals("unknown") || foundPlayer == null){
             throw new NotFoundException(String.format("for Player with name %s no result was found!", name));
         } else {
             return foundPlayer;
         }
     }
+
+    public boolean savePlayer(Player toSave){
+        log.debug("entering savePlayer with player {}", toSave);
+        if (toSave == null){
+            throw new InvalidInputException("Player cannot be null");
+        }
+        boolean result = this.playerDAO.savePlayer(toSave);
+        log.info("stored player {} successfully: {}", toSave, result);
+        return result;
+    }
+
+
 }

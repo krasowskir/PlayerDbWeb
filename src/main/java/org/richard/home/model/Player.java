@@ -3,13 +3,13 @@ package org.richard.home.model;
 import java.util.Objects;
 
 public class Player {
-    private int alter;
     private String name;
+    private int alter;
 
     public Player() {
     }
 
-    public Player(int alter, String name) {
+    public Player(String name, int alter) {
         this.alter = alter;
         this.name = name;
     }

@@ -10,7 +10,7 @@ class PlayerServiceSpec extends Specification {
 
         given:
         def mockedPlayerDAO = Mock(PlayerDAO.class){
-            1 * getPlayer(_ as String) >> new Player(30, 'richard')
+            1 * getPlayer(_ as String) >> new Player('richard', 30)
         }
 
         def playerService = new PlayerService(mockedPlayerDAO)

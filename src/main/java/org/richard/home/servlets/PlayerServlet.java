@@ -1,32 +1,35 @@
 package org.richard.home.servlets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.richard.home.exception.InvalidInputException;
 import org.richard.home.model.Player;
 import org.richard.home.service.PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-@Component
-public class MeinServlet extends HttpServlet {
+public class PlayerServlet extends HttpServlet {
 
-    Logger log = LoggerFactory.getLogger(MeinServlet.class);
-
+    Logger log = LoggerFactory.getLogger(PlayerServlet.class);
+    private ObjectMapper objectMapper;
     private PlayerService playerService;
 
-    public MeinServlet() {
+    public PlayerServlet() {
     }
 
-    public PlayerService getPlayerService() {
-        return playerService;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     public void setPlayerService(PlayerService playerService) {
@@ -89,29 +92,71 @@ public class MeinServlet extends HttpServlet {
         OutputStream out = resp.getOutputStream();
         resp.setContentType("text/html");
 
-        try {
-            resp.setStatus(HttpServletResponse.SC_OK);
-            String content = new String(Files.readAllBytes(Path.of(getServletContext().getResource("/WEB-INF/classes/index.html").toURI())));
-            if (foundPlayer != null) {
-                out.write(new StringBuilder(content).insert(173, foundPlayer.toString()).toString().getBytes());
-                out.flush();
-            } else {
-                out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
-                out.flush();
-            }
-        } catch (URISyntaxException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.write("error".getBytes());
+
+        resp.setStatus(HttpServletResponse.SC_OK);
+        String content = provideHtmlTemplate();
+        if (foundPlayer != null) {
+            out.write(new StringBuilder(content).insert(173, foundPlayer.toString()).toString().getBytes());
+            out.flush();
+        } else {
+            out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
             out.flush();
         }
+
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String[]> params = req.getParameterMap();
-        Set<String> paramKeys = params.keySet();
-        paramKeys.forEach(k -> System.out.println("name: " + k + " values: " + Arrays.toString(params.get(k))));
-        super.doPost(req, resp);
+        OutputStream out = resp.getOutputStream();
+        resp.setContentType("text/html");
+        String content = provideHtmlTemplate();
+
+        try (BufferedReader bin = req.getReader()){
+            String playerStr = readRequestBody(bin);
+            Player newPlayer = mapToPlayer(playerStr);
+            boolean result = playerService.savePlayer(newPlayer);
+            log.info("result of call to playerService.savePlayer was {}", result);
+            if (result){
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+                out.write(new StringBuilder(content).insert(173, newPlayer.toString()).toString().getBytes());
+            } else {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.write("error with processing player".getBytes());
+            }
+        } catch (JsonProcessingException e){
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("error with provided input values".getBytes());
+        } catch (InvalidInputException e){
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("error with processing player".getBytes());
+        } finally {
+            out.flush();
+            out.close();
+        }
+    }
+
+    private String provideHtmlTemplate() {
+        try {
+            String pathIndxHtml = "/WEB-INF/classes/index.html";
+            return new String(Files.readAllBytes(Path.of(getServletContext().getResource(pathIndxHtml).toURI())));
+        } catch (URISyntaxException | IOException e){
+            log.error ("{} by looking for index.html",e.getClass().getName());
+        }
+        return "";
+    }
+
+    private String readRequestBody(BufferedReader bin) throws IOException {
+        char[] data = new char[1024];
+        StringBuilder strB = new StringBuilder();
+        while (bin.read(data) != -1){
+            strB.append(data);
+        }
+        return strB.toString();
     }
 
     @Override
@@ -124,5 +169,7 @@ public class MeinServlet extends HttpServlet {
         super.doDelete(req, resp);
     }
 
-
+    public Player mapToPlayer(String from) throws JsonProcessingException {
+        return objectMapper.readValue(from, Player.class);
+    }
 }

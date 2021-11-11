@@ -73,6 +73,13 @@
             <version>5.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>8.0.2</version>
+            <scope>test</scope>
+        </dependency>
+
 <!--        testing-->
         <dependency>
             <groupId>org.spockframework</groupId>
@@ -81,6 +88,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
+        </dependency>
 <!--        spring-->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -93,6 +106,15 @@
             <artifactId>spring-webmvc</artifactId>
             <version>5.3.12</version>
         </dependency>
+
+<!--        jackson objectMapper-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 
     </dependencies>
 
@@ -152,6 +174,20 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <resources>
+                        <resource>
+                            <directory>${basedir}</directory>
+                            <include>schema.sql</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
 

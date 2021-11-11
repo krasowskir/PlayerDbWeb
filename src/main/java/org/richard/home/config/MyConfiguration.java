@@ -1,8 +1,7 @@
 package org.richard.home.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
-import org.postgresql.ds.PGPoolingDataSource;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.richard.home.dao.PlayerDAO;
 import org.richard.home.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +13,9 @@ import javax.sql.DataSource;
 @Configuration
 public class MyConfiguration {
 
-    @Bean(name = "dataSourceMulti")
-    public DataSource multiThreadDataSource(){
-        PGPoolingDataSource dataSource = new PGPoolingDataSource();
-        dataSource.setServerName("localhost");
-        dataSource.setInitialConnections(3);
-        dataSource.setMaxConnections(10);
-        dataSource.setLoginTimeout(10);
-        dataSource.setUser("richard");
-        dataSource.setPassword("test123");
-        dataSource.setUrl("jdbc:postgresql://meinedb:5432/playerdb");
-        return dataSource;
+    @Bean
+    public ObjectMapper objectMapper(){
+        return new ObjectMapper();
     }
 
     @Bean(name = "readDataSource")
@@ -46,15 +37,6 @@ public class MyConfiguration {
         return dataSource;
     }
 
-    @Bean(name = "dataSourceSingle")
-    public DataSource singleThreadDataSource(){
-        PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUser("richard");
-        dataSource.setPassword("test123");
-        dataSource.setUrl("jdbc:postgresql://meinedb:5432/playerdb");
-        return dataSource;
-    }
-
     @Bean(name = "hikariDataSource")
     public DataSource hikari(){
         HikariDataSource dataSource = new HikariDataSource();
@@ -73,12 +55,6 @@ public class MyConfiguration {
 
         return dataSource;
     }
-
-    //@Qualifier("multiThreadDataSource") funktioniert nicht
-//    @Bean
-//    public PostgresPlayerDAO playerDAO( DataSource dataSource){
-//        return new PostgresPlayerDAO(dataSource);
-//    }
 
     @Bean
     @Autowired

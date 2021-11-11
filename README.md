@@ -37,3 +37,6 @@ curl -i -X GET http://localhost:8080/playerdbweb/mein
 ```
 \conninfo
 ```
+
+## Running...
+`curl -i -X POST http://localhost:8080/playerdbweb/mein -H "Content-type: application/json" -d '{"name":"waldemar", "alter": 28 }'`

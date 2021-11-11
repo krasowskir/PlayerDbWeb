@@ -9,4 +9,6 @@ public interface PlayerDAO {
     Player getPlayer(String name);
 
     List<Player> getPlayerByAlter(int alter);
+
+    boolean savePlayer(Player toSave);
 }
