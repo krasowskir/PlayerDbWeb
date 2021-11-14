@@ -35,7 +35,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
     }
 
     @Override
-    public Player getPlayer(String name) {
+    public Player getPlayer(String name) throws DatabaseAccessFailed {
         log.debug("entering getPlayer with name {}", name);
         try (Connection con = this.slave.getConnection()) {
             log.debug("connection to db: {}", !con.isClosed());
@@ -47,12 +47,12 @@ public class PostgresPlayerDAO implements PlayerDAO {
             }
         } catch (SQLException e) {
             log.error(e.getClass().getName());
-            throw new NotFoundException(String.format("player %s not found in db", name), e);
+            throw new DatabaseAccessFailed(String.format("player %s not found in db", name), e);
         }
     }
 
     @Override
-    public List<Player> getPlayerByAlter(int alter) {
+    public List<Player> getPlayerByAlter(int alter) throws DatabaseAccessFailed {
         log.debug("getPlayerByAlter with alter {}", alter);
         try (Connection con = this.slave.getConnection()) {
             log.debug("connection established? : {}", con.isValid(200));
@@ -66,7 +66,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
         } catch (SQLException e) {
             log.error(e.getClass().getName());
             log.error(Arrays.toString(e.getStackTrace()));
-            throw new NotFoundException(String.format("player with alter %d not found in db", alter), e);
+            throw new DatabaseAccessFailed(String.format("player with alter %d not found in db", alter), e);
         }
     }
 
@@ -101,7 +101,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
         try (Connection con = this.master.getConnection()) {
             log.debug("connection established? : {}", con.isValid(200));
             logWarningsOfConnection(con);
-            try (PreparedStatement pS = con.prepareStatement(UPDATE_PLAYER)) {
+            try (PreparedStatement pS = con.prepareStatement(UPDATE_PLAYER,ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
                 pS.setString(1, toBe.getName());
                 pS.setInt(2, toBe.getAlter());
                 pS.setString(3, nameWhere);

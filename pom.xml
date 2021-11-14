@@ -244,7 +244,6 @@
                     <reuseForks>false</reuseForks>
                     <includes>
                         <include>**/*Spec.java</include>
-                        <include>**/*Test.java</include>
                     </includes>
                 </configuration>
             </plugin>

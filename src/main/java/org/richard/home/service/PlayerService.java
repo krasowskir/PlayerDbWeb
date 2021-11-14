@@ -28,7 +28,7 @@ public class PlayerService {
             Player foundPlayer = this.playerDAO.getPlayer(name);
             log.info("player returned {}", foundPlayer);
             return foundPlayer;
-        } catch (NotFoundException e){
+        } catch (NotFoundException | DatabaseAccessFailed e){
             log.warn("no found players for name {}. Will return unknown player.", name);
             return new Player("unknown", 0);
         }
@@ -38,7 +38,7 @@ public class PlayerService {
         try {
             List<Player> foundPlayers = playerDAO.getPlayerByAlter(alter);
             return foundPlayers;
-        } catch (NotFoundException  ne){
+        } catch (NotFoundException | DatabaseAccessFailed ne){
             log.warn("no found players for age {}. Will return empty list.", alter, ne);
             return List.of();
         }

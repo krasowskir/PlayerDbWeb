@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface PlayerDAO {
 
-    Player getPlayer(String name);
+    Player getPlayer(String name) throws DatabaseAccessFailed;
 
-    List<Player> getPlayerByAlter(int alter);
+    List<Player> getPlayerByAlter(int alter) throws DatabaseAccessFailed;
 
     boolean savePlayer(Player toSave) throws DatabaseAccessFailed;
 
