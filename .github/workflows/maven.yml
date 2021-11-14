@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: bitnami/java:11.0.13-prod
+    runs-on: minideb-latest
 
     steps:
     - uses: actions/checkout@v2
