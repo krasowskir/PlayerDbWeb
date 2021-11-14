@@ -38,7 +38,7 @@ public class PlayerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("=== params ===");
+        log.debug("=== params ===");
         req.getParameterMap()
                 .forEach((key, value) -> log.debug("name: " + key + " values: " + Arrays.toString(value)));
 
@@ -83,26 +83,32 @@ public class PlayerServlet extends HttpServlet {
                 log.debug("cookie: " + cookies[0].getName() + " val: " + cookies[0].getValue());
             }
         }
-        Player foundPlayer = null;
+        List<Player> foundPlayers = new ArrayList<>();
         if (req.getParameter("player") != null) {
-            foundPlayer = playerService.fetchSinglePlayer(req.getParameter("player"));
-            log.debug("found player {} in servlet", foundPlayer);
+            foundPlayers.add(playerService.fetchSinglePlayer(req.getParameter("player")));
+            log.debug("found players {} in servlet", foundPlayers);
+        } else if (req.getParameter("alter") != null){
+            foundPlayers = playerService.fetchPlayersByAlter(Integer.parseInt(req.getParameter("alter")));
+            log.debug("found players {} in servlet", foundPlayers);
         }
 
+        provideResponse(resp, sessVal, foundPlayers);
+
+    }
+
+    private void provideResponse(HttpServletResponse resp, String sessVal, List<Player> foundPlayers) throws IOException {
         OutputStream out = resp.getOutputStream();
         resp.setContentType("text/html");
 
-
         resp.setStatus(HttpServletResponse.SC_OK);
         String content = provideHtmlTemplate();
-        if (foundPlayer != null) {
-            out.write(new StringBuilder(content).insert(173, foundPlayer.toString()).toString().getBytes());
+        if (foundPlayers != null && foundPlayers.size() > 0) {
+            out.write(new StringBuilder(content).insert(173, List.of(foundPlayers).toString()).toString().getBytes());
             out.flush();
         } else {
             out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
             out.flush();
         }
-
     }
 
     @Override
@@ -161,11 +167,48 @@ public class PlayerServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);
+        OutputStream out = resp.getOutputStream();
+        resp.setContentType("text/html");
+        String content = provideHtmlTemplate();
+
+        log.debug("=== params ===");
+        req.getParameterMap()
+                .forEach((key, value) -> log.debug("name: " + key + " values: " + Arrays.toString(value)));
+        String playerNameToUpdate = req.getParameter("name");
+
+        try (BufferedReader bin = req.getReader()){
+            String playerStr = readRequestBody(bin);
+            Player newPlayer = mapToPlayer(playerStr);
+            boolean result = playerService.updatePlayer(newPlayer, playerNameToUpdate);
+            log.info("result of call to playerService.savePlayer was {}", result);
+            if (result){
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+                out.write(new StringBuilder(content).insert(173, newPlayer.toString()).toString().getBytes());
+            } else {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.write("error with processing player".getBytes());
+            }
+        } catch (JsonProcessingException e){
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("error with provided input values".getBytes());
+        } catch (InvalidInputException e){
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("error with processing player".getBytes());
+        } finally {
+            out.flush();
+            out.close();
+        }
     }
+
+
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         super.doDelete(req, resp);
     }
 

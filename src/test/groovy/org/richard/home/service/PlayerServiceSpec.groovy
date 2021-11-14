@@ -42,6 +42,32 @@ class PlayerServiceSpec extends Specification {
         badInput << [null, '', '  ']
     }
 
+    def 'fetchPlayers by age'(){
+
+        def mockedPlayerDAO = Mock(PlayerDAO){
+            1 * getPlayerByAlter(_ as Integer) >> List.of(
+                    new Player('richard', 30),
+                    new Player('waldemar', 30)
+            )
+        }
+
+        def playerService = new PlayerService(mockedPlayerDAO)
+
+        when:
+        def result = playerService.fetchPlayersByAlter(30)
+
+        then:
+        result.size() == 2
+
+        and:
+        with(result[0]){
+            name == 'richard'
+            alter == 30
+        }
+    }
+
+
+
     def 'test savePlayer with valid player'(){
 
         given:

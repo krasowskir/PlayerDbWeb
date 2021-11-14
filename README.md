@@ -1,12 +1,32 @@
 # PlayerDbWeb
+This application allows you to create players, teams, addresses and games. 
+It allows you to simulate different actions and changes in team constalation and players carreers.
+
+## Use cases
+- creating players
+- adding players to teams
+- creating addresses
+- relocation of the players
+
+## testing the application
+unit + integration + packaging: ``mvn clean install``
+
+running single test: 
+```
+mvn clean test -Dtest=org.richard.home.dao.PostgresPlayerDAOSpec#"a valid player can be searched in postgresPlayerDAO"
+```
+
+displaying the test results and coverage
+`target/site/jacoco/index.html`
 
 ## building the image
-```
-docker build -t jetty-img .
-```
+several containers env: `docker-compose up -d --build`
+
+single artifact: `docker build -t jetty-img .`
 
 ## removing old stuff
 ```
+docker-compose down
 docker stop jetty-cont; docker rm jetty-cont; docker rmi jetty-img
 ```
 
@@ -28,10 +48,17 @@ docker logs -f jetty-cont
 ### checking the running application
 ```
 curl -i -X GET http://localhost:8080/playerdbweb/mein
+curl -i -X GET http://localhost:8080/playerdbweb/mein?player=richard
+curl -i -X GET http://localhost:8080/playerdbweb/mein?alter=28
 ```
 
 
 ## Database
+```
+docker exec -it playerdbweb_meinedb_1 psql -U richard playerdb;
+\conninfo;
+\du;
+```
 
 ### checking current user
 ```
@@ -39,4 +66,12 @@ curl -i -X GET http://localhost:8080/playerdbweb/mein
 ```
 
 ## Running...
-`curl -i -X POST http://localhost:8080/playerdbweb/mein -H "Content-type: application/json" -d '{"name":"waldemar", "alter": 28 }'`
+creating a player:
+```
+curl -i -X POST http://localhost:8080/playerdbweb/mein -H "Content-type: application/json" -d '{"name":"waldemar", "alter": 28 }'
+```
+
+updating a player:
+```
+curl -i -X PUT http://localhost:8080/playerdbweb/mein?name=lidia -H "Content-type: application/json" -d '{"name":"lidia", "alter": 28 }'
+```

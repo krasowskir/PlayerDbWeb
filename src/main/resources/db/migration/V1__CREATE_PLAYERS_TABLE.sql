@@ -21,6 +21,7 @@ create table belongs_to (
 GRANT ALL ON players TO richard;
 
 insert into players values(default, 'richard', 30);
+insert into players values(default, 'arnold', 30);
 insert into players values(default, 'lidia', 33);
 
 
