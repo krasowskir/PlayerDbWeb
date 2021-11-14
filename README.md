@@ -1,4 +1,5 @@
-# PlayerDbWeb
+# PlayerDbWeb 
+## status: ![example workflow](https://github.com/krasowskir/PlayerDbWeb/actions/workflows/maven.yml/badge.svg)
 This application allows you to create players, teams, addresses and games. 
 It allows you to simulate different actions and changes in team constalation and players carreers.
 
