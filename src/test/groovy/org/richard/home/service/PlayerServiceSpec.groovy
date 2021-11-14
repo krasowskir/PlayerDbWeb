@@ -1,7 +1,7 @@
 package org.richard.home.service
 
 import org.richard.home.dao.PlayerDAO
-import org.richard.home.dao.PostgresPlayerDAO
+import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.InvalidInputException
 import org.richard.home.model.Player
 import spock.lang.Specification
@@ -66,8 +66,6 @@ class PlayerServiceSpec extends Specification {
         }
     }
 
-
-
     def 'test savePlayer with valid player'(){
 
         given:
@@ -85,5 +83,28 @@ class PlayerServiceSpec extends Specification {
 
         where:
         persistenceResult << [true, false]
+    }
+
+    def 'test updatePlayer - happy path'(){
+
+        given:
+        def mockedPlayerDAO = Mock(PlayerDAO.class){
+            updatePlayer(_, 'lidia') >> new Player('lidia',28)
+            updatePlayer(_, 'NONE') >> {
+                throw new DatabaseAccessFailed()
+            }
+        }
+
+        def playerService = new PlayerService(mockedPlayerDAO)
+
+        when:
+        def result = playerService.updatePlayer(new Player('lidia', 28), matchedName)
+
+        then:
+        result == updateResult
+
+        where:
+        updateResult << [true, false]
+        matchedName << ['lidia', 'NONE']
     }
 }

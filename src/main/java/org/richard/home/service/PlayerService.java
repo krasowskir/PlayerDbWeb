@@ -29,6 +29,7 @@ public class PlayerService {
             log.info("player returned {}", foundPlayer);
             return foundPlayer;
         } catch (NotFoundException e){
+            log.warn("no found players for name {}. Will return unknown player.", name);
             return new Player("unknown", 0);
         }
     }
@@ -54,7 +55,7 @@ public class PlayerService {
             log.info("stored player {} successfully: {}", toSave, result);
             return result;
         } catch (DatabaseAccessFailed de){
-            log.error("saving player failed", de);
+            log.warn("saving player failed", de);
             return false;
         }
     }
@@ -70,7 +71,7 @@ public class PlayerService {
             log.info("updated player {} successfully: {}", toBe, result);
             return result;
         } catch (DatabaseAccessFailed de){
-            log.error("saving player failed", de);
+            log.warn("saving player failed", de);
             return false;
         }
     }

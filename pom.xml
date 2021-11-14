@@ -189,6 +189,10 @@
                             <directory>${basedir}</directory>
                             <include>schema.sql</include>
                         </resource>
+                        <resource>
+                            <directory>${basedir}/src/test/resources</directory>
+                            <include>**</include>
+                        </resource>
                     </resources>
                 </configuration>
             </plugin>
