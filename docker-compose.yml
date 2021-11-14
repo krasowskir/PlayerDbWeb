@@ -1,0 +1,34 @@
+version: '3'
+services:
+  meinedb:
+    image: bitnami/postgresql:latest
+    volumes:
+      - "./schema.sql:/docker-entrypoint-initdb.d/schema.sql"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRESQL_PASSWORD=test123
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=richard
+      - POSTGRESQL_REPLICATION_PASSWORD=test123
+  slave:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5433:5432"
+    depends_on:
+      - meinedb
+    environment:
+      - POSTGRESQL_PASSWORD=test123
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_MASTER_HOST=meinedb
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_REPLICATION_USER=richard
+      - POSTGRESQL_REPLICATION_PASSWORD=test123
+  playerdbweb:
+    build: .
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    depends_on:
+      - "meinedb"
+      - "slave"

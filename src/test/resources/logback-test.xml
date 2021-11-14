@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.richard.home" level="debug">
+    <logger name="org.richard.home" level="ERROR">
         <appender-ref ref="richOut" />
     </logger>
 
@@ -21,8 +21,5 @@
         <appender-ref ref="richOut" />
     </logger>
 
-<!--    <root level="off">-->
-<!--        <appender-ref ref="richOut" />-->
-<!--    </root>-->
 
 </configuration>
