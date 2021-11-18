@@ -1,0 +1,56 @@
+<!Doctype html>
+<html lang="en">
+    <head>
+        <meta content="text/html" charset="UTF-8">
+        <title>Player profile</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body>
+        <main>
+            <div class="mx-4 my-4 px-5 py-5 bg-light">
+                <h1>Player profile</h1>
+                <div class="container-md px-1 py-1">
+                    <form class="mb-3">
+                        <fieldset disabled>
+                            <div class="mb-3">
+                                <label for="playerName" class="form-label">player name:</label>
+                                <input type="text" id="playerName" class="form-control" data-th-placeholder="${player.name}"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="playerAge" class="form-label">player alter:</label>
+                                <input type="text" id="playerAge" class="form-control" data-th-placeholder="${player.alter}">
+                            </div>
+                        </fieldset>
+                        <div class="inputgroup mb-3">
+                            <div class="mb-3">
+                                <label for="city" class="form-label">city:</label>
+                                <input type="text" id="city" class="form-control" placeholder="city" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="street" class="form-label">street:</label>
+                                <input type="text" id="street" class="form-control" placeholder="street" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="plz" class="form-label">plz:</label>
+                                <input type="text" id="plz" class="form-control" placeholder="plz" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="country" class="form-label">country:</label>
+                                <input type="text" id="country" class="form-control" placeholder="country" />
+                            </div>
+                            <div class="btn-group mx-1" role="group">
+                                <button class="btn btn-primary mx-1" id="createAddress">New Address</button>
+                                <button class="btn btn-warning mx-1" id="updatePlayer">Update Player</button>
+                                <button class="btn btn-danger mx-1" id="deletePlayer">Delete Player</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </main>
+
+    </body>
+</html>

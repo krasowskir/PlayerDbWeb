@@ -8,6 +8,8 @@ import org.richard.home.exception.NotFoundException
 import org.richard.home.model.Player
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.spockframework.runtime.model.parallel.ExecutionMode
+import spock.lang.Execution
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -20,7 +22,7 @@ import java.sql.SQLException
     ToDo: this class is an integration test, but it is treated as a unit test. As a consequence you can not utilize mvn
     parallel builds. The surefire plugin has to be configured to run sequentially.
  */
-
+@Execution(ExecutionMode.SAME_THREAD)
 class PostgresPlayerDAOSpec extends Specification {
 
     Logger log = LoggerFactory.getLogger(PostgresPlayerDAOSpec.class)
@@ -46,6 +48,7 @@ class PostgresPlayerDAOSpec extends Specification {
         log.info('migration successful?: {}', migrRes.success)
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'a valid player can be searched in postgresPlayerDAO'() {
 
         log.info('a valid player can be searched in postgresPlayerDAO')
@@ -63,6 +66,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'trying to fetch a player with a flawed dataSource leads to DataAccessException'() {
 
         log.info('trying to fetch a player with a flawed dataSource leads to DataAccessException')
@@ -91,6 +95,7 @@ class PostgresPlayerDAOSpec extends Specification {
         thrown(DatabaseAccessFailed)
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'player #name throws an Exception in postgresPlayerDAO'() {
 
         log.info('player #name throws an Exception in postgresPlayerDAO')
@@ -108,6 +113,7 @@ class PostgresPlayerDAOSpec extends Specification {
         name << ['none', '', null]
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'PostgresPlayerDAO can find players by their age'() {
 
         log.info('PostgresPlayerDAO can find players by their age')
@@ -133,6 +139,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'findByAlter with a flawed dataSource leads to DataAccessException'() {
 
         log.info('findByAlter with a flawed dataSource leads to DataAccessException')
@@ -161,6 +168,7 @@ class PostgresPlayerDAOSpec extends Specification {
         thrown(DatabaseAccessFailed)
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'PostgresPlayerDAO can persist a player'() {
 
         log.info('PostgresPlayerDAO can persist a player')
@@ -181,6 +189,7 @@ class PostgresPlayerDAOSpec extends Specification {
         fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'persisting leads to an error'() {
 
         log.info('persisting leads to an error')
@@ -210,6 +219,7 @@ class PostgresPlayerDAOSpec extends Specification {
         thrown(DatabaseAccessFailed)
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'trying to find by age =0 throws exception'() {
 
         log.info('trying to find by age =0 throws exception')
@@ -226,6 +236,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'updating an existing player works'() {
 
         log.info('trying to find by age =0 throws exception')
@@ -245,6 +256,7 @@ class PostgresPlayerDAOSpec extends Specification {
         changedPlayer.alter == 30
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'updating an existing player with wrong name'() {
 
         log.info('trying to find by age =0 throws exception')
@@ -260,6 +272,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'updating a player - unhappy path'() {
 
         log.info('updating a player - unhappy path')

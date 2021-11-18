@@ -1,5 +1,6 @@
 package org.richard.home.service
 
+import org.richard.home.dao.AddressDAO
 import org.richard.home.dao.PlayerDAO
 import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.InvalidInputException
@@ -11,11 +12,12 @@ class PlayerServiceSpec extends Specification {
     def "test fetchSinglePlayer"() {
 
         given:
+        def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
             1 * getPlayer(_ as String) >> new Player('richard', 30)
         }
 
-        def playerService = new PlayerService(mockedPlayerDAO)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
         def result = playerService.fetchSinglePlayer('richard')
@@ -29,8 +31,8 @@ class PlayerServiceSpec extends Specification {
 
         given:
         def mockedPlayerDAO = Mock(PlayerDAO.class)
-
-        def playerService = new PlayerService(mockedPlayerDAO)
+        def mockedAddressDAO = Mock(AddressDAO.class)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
         def result = playerService.fetchSinglePlayer(badInput as String)
@@ -44,6 +46,8 @@ class PlayerServiceSpec extends Specification {
 
     def 'fetchPlayers by age'(){
 
+        given:
+        def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO){
             1 * getPlayerByAlter(_ as Integer) >> List.of(
                     new Player('richard', 30),
@@ -51,7 +55,7 @@ class PlayerServiceSpec extends Specification {
             )
         }
 
-        def playerService = new PlayerService(mockedPlayerDAO)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
         def result = playerService.fetchPlayersByAlter(30)
@@ -69,11 +73,12 @@ class PlayerServiceSpec extends Specification {
     def 'test savePlayer with valid player'(){
 
         given:
+        def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
             1 * savePlayer(_ as Player) >> persistenceResult
         }
 
-        def playerService = new PlayerService(mockedPlayerDAO)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
         def result = playerService.savePlayer(new Player('richard', 30))
@@ -88,6 +93,7 @@ class PlayerServiceSpec extends Specification {
     def 'test updatePlayer - happy path'(){
 
         given:
+        def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
             updatePlayer(_, 'lidia') >> new Player('lidia',28)
             updatePlayer(_, 'NONE') >> {
@@ -95,7 +101,7 @@ class PlayerServiceSpec extends Specification {
             }
         }
 
-        def playerService = new PlayerService(mockedPlayerDAO)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
         def result = playerService.updatePlayer(new Player('lidia', 28), matchedName)

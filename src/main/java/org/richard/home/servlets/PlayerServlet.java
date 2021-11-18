@@ -148,7 +148,7 @@ public class PlayerServlet extends HttpServlet {
 
     private String provideHtmlTemplate() {
         try {
-            String pathIndxHtml = "/WEB-INF/classes/index.html";
+            String pathIndxHtml = "/WEB-INF/templates/index.html";
             return new String(Files.readAllBytes(Path.of(getServletContext().getResource(pathIndxHtml).toURI())));
         } catch (URISyntaxException | IOException e){
             log.error ("{} by looking for index.html",e.getClass().getName());
@@ -203,8 +203,6 @@ public class PlayerServlet extends HttpServlet {
             out.close();
         }
     }
-
-
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

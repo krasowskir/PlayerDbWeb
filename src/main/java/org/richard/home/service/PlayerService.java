@@ -1,22 +1,27 @@
 package org.richard.home.service;
 
+import org.richard.home.dao.AddressDAO;
 import org.richard.home.dao.PlayerDAO;
 import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.exception.InvalidInputException;
 import org.richard.home.exception.NotFoundException;
+import org.richard.home.model.Address;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PlayerService {
     Logger log = LoggerFactory.getLogger(PlayerService.class);
 
     private PlayerDAO playerDAO;
+    private AddressDAO addressDAO;
 
-    public PlayerService(PlayerDAO playerDAO) {
+    public PlayerService(PlayerDAO playerDAO, AddressDAO addressDAO) {
         this.playerDAO = playerDAO;
+        this.addressDAO = addressDAO;
     }
 
     public Player fetchSinglePlayer(String name){
@@ -43,6 +48,7 @@ public class PlayerService {
             return List.of();
         }
     }
+
 
     public boolean savePlayer(Player toSave) {
         log.debug("entering savePlayer with player {}", toSave);
@@ -76,6 +82,40 @@ public class PlayerService {
         }
     }
 
+    public boolean saveAddress(Address toSave){
+        log.debug("entering saveAddress with Address {}", toSave);
+        if (toSave == null){
+            throw new InvalidInputException("Address cannot be null");
+        }
+        boolean result;
+        try {
+            result = this.addressDAO.saveAddress(toSave);
+            log.info("stored address {} successfully: {}", toSave, result);
+            return result;
+        } catch (DatabaseAccessFailed de){
+            log.warn("saving address failed", de);
+            return false;
+        }
+    }
 
+    public Optional<Address> getAddressById(long id){
+        log.debug("entering getAddressById with id {}", id);
+        try {
+            Address foundAddress = this.addressDAO.getAddress(id);
+            log.info("address returned {}", foundAddress);
+            return Optional.of(foundAddress);
+        } catch (DatabaseAccessFailed e){
+            log.warn("DatabaseAccessFailed for id {}", id);
+            return Optional.empty();
+        } catch (NotFoundException ne){
+            log.warn("no found addresses for id {}", id);
+            return Optional.empty();
+        }
+    }
+
+//    public Address fetchAddressesLike(String name){
+//        log.debug("entering fetchAddressesLike with name {}", name);
+//
+//    }
 
 }

@@ -2,6 +2,7 @@ package org.richard.home.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
+import org.richard.home.dao.AddressDAO;
 import org.richard.home.dao.PlayerDAO;
 import org.richard.home.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class MyConfiguration {
 
     @Bean
     @Autowired
-    public PlayerService playerService(PlayerDAO playerDAO){
-        return new PlayerService(playerDAO);
+    public PlayerService playerService(PlayerDAO playerDAO, AddressDAO addressDAO){
+        return new PlayerService(playerDAO, addressDAO);
     }
 }
