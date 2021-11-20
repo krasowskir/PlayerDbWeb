@@ -5,6 +5,8 @@ import org.flywaydb.core.api.Location
 import org.h2.jdbcx.JdbcDataSource
 import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.NotFoundException
+import org.richard.home.model.Address
+import org.richard.home.model.Country
 import org.richard.home.model.Player
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,10 +27,13 @@ import java.sql.SQLException
 @Execution(ExecutionMode.SAME_THREAD)
 class PostgresPlayerDAOSpec extends Specification {
 
-    Logger log = LoggerFactory.getLogger(PostgresPlayerDAOSpec.class)
+    private static Logger log = LoggerFactory.getLogger(PostgresPlayerDAOSpec.class)
 
     @Shared
     def dataSource
+
+    @Shared
+    Connection con
 
     def setup() {
 
@@ -38,7 +43,8 @@ class PostgresPlayerDAOSpec extends Specification {
         dataSource.password = 'test123'
         dataSource.url = "jdbc:h2:mem:playerdb;MODE=PostgreSQL"
 
-        log.info('connection valid?: {}', dataSource.getConnection().isValid(100))
+        con = dataSource.getConnection()
+        log.info('connection valid?: {}', con.isValid(100))
         def flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations(new Location('classpath:db/migration'))
@@ -48,13 +54,16 @@ class PostgresPlayerDAOSpec extends Specification {
         log.info('migration successful?: {}', migrRes.success)
     }
 
+    def cleanup(){
+        con.close()
+    }
+
     @Execution(ExecutionMode.SAME_THREAD)
     def 'a valid player can be searched in postgresPlayerDAO'() {
 
         log.info('a valid player can be searched in postgresPlayerDAO')
 
         given:
-        setup()
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
         when: 'calling getPlayer with a name'
@@ -92,11 +101,11 @@ class PostgresPlayerDAOSpec extends Specification {
         postgresPlayerDAO.getPlayer('richard')
 
         then: 'an exception is thrown from service layer'
-        thrown(DatabaseAccessFailed)
+        thrown(NotFoundException)
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
-    def 'player #name throws an Exception in postgresPlayerDAO'() {
+    def 'player #name throws an NotFoundException in postgresPlayerDAO'() {
 
         log.info('player #name throws an Exception in postgresPlayerDAO')
 
@@ -122,20 +131,16 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
         when: 'calling getPlayerByAlter'
-        def foundPlayers = postgresPlayerDAO.getPlayerByAlter(age)
+        def foundPlayers = postgresPlayerDAO.getPlayerByAlter(33)
 
         then: 'always a list of players is returned'
         foundPlayers != null
 
         and:
         with(foundPlayers) {
-            size() == mySize
+            size() == 1
             get(0).getName() != null
         }
-
-        where:
-        age << [33, 30]
-        mySize << [1, 2]
 
     }
 
@@ -180,13 +185,13 @@ class PostgresPlayerDAOSpec extends Specification {
         def player = fromPlayer
 
         when: 'calling savePlayer with a valid player'
-        def success = postgresPlayerDAO.savePlayer(player)
+        def playerId = postgresPlayerDAO.savePlayer(player)
 
         then:
-        success
+        playerId != 0
 
         where:
-        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
+        fromPlayer << [new Player('Toni', 29), new Player('Katja', 29)]
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
@@ -196,7 +201,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
         given: 'a flacky dataSource'
         Connection mockedConnection = Mock(Connection) {
-            prepareStatement(_) >> Mock(PreparedStatement) {
+            prepareStatement(_ as String, _ as Integer) >> Mock(PreparedStatement) {
                 executeUpdate() >> {
                     throw new SQLException()
                 }
@@ -210,12 +215,61 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(mockedDataSource, mockedDataSource)
 
         when: 'calling savePlayer with a valid player'
-        def success = postgresPlayerDAO.savePlayer(new Player('richard', 30))
+        postgresPlayerDAO.savePlayer(new Player('testi', 28))
+
+        then:'an exception is thrown from service layer'
+        thrown(DatabaseAccessFailed)
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
+    def 'calling savePlayerLivesIn stores an address and then the player lives'() {
+
+        log.info('PostgresPlayerDAO can persist a player')
+
+        given: 'the postgresPlayerDAO'
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+
+        and: 'a simulated persisted address (id = 1 already exists in db)'
+        def address = new Address()
+        address.id = 1
+
+        and: 'saving the player in the db'
+        def playerId = postgresPlayerDAO.savePlayer(fromPlayer)
+        fromPlayer.id = playerId
+
+        when: 'calling savePlayer with a saved player and a persisted address'
+        def success = postgresPlayerDAO.savePlayerLivesIn(fromPlayer, address)
 
         then:
-        !success
+        success
 
-        and: 'an exception is thrown from service layer'
+        where:
+        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
+    def 'calling savePlayerLivesIn handles db exceptions'(){
+        log.info('saveAddressForPlayer leads to an error')
+
+        given: 'a flacky dataSource'
+        Connection mockedConnection = Mock(Connection) {
+            prepareStatement(_ as String, _ as Integer) >> Mock(PreparedStatement) {
+                executeUpdate() >> {
+                    throw new SQLException()
+                }
+            }
+        }
+        def mockedDataSource = Mock(DataSource) {
+            getConnection() >> mockedConnection
+        }
+
+        and: 'postgresPlayerDAO'
+        def postgresPlayerDAO = new PostgresPlayerDAO(mockedDataSource, mockedDataSource)
+
+        when: 'calling savePlayer with a valid player'
+        postgresPlayerDAO.savePlayer(new Player('richard', 30))
+
+        then: 'an exception is thrown from service layer'
         thrown(DatabaseAccessFailed)
     }
 

@@ -4,6 +4,7 @@ import org.richard.home.dao.AddressDAO
 import org.richard.home.dao.PlayerDAO
 import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.InvalidInputException
+import org.richard.home.exception.NotFoundException
 import org.richard.home.model.Player
 import spock.lang.Specification
 
@@ -44,6 +45,21 @@ class PlayerServiceSpec extends Specification {
         badInput << [null, '', '  ']
     }
 
+    def 'test fetchSinglePlayer that cant be found'(){
+        given:
+        def mockedPlayerDAO = Mock(PlayerDAO.class){
+            getPlayer(_) >> { throw  new NotFoundException()}
+        }
+        def mockedAddressDAO = Mock(AddressDAO.class)
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
+
+        when:
+        def result = playerService.fetchSinglePlayer('notExisting')
+
+        then:
+        thrown(NotFoundException)
+    }
+
     def 'fetchPlayers by age'(){
 
         given:
@@ -75,7 +91,7 @@ class PlayerServiceSpec extends Specification {
         given:
         def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
-            1 * savePlayer(_ as Player) >> persistenceResult
+            1 * savePlayer(_ as Player) >> 1
         }
 
         def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
@@ -84,10 +100,7 @@ class PlayerServiceSpec extends Specification {
         def result = playerService.savePlayer(new Player('richard', 30))
 
         then:
-        result == persistenceResult
-
-        where:
-        persistenceResult << [true, false]
+        result != 0
     }
 
     def 'test updatePlayer - happy path'(){
@@ -112,5 +125,9 @@ class PlayerServiceSpec extends Specification {
         where:
         updateResult << [true, false]
         matchedName << ['lidia', 'NONE']
+    }
+
+    def 'saveAddressForPlayer saves the address and player information'(){
+
     }
 }

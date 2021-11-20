@@ -21,8 +21,8 @@
         <appender-ref ref="richOut" />
     </logger>
 
-<!--    <root level="off">-->
-<!--        <appender-ref ref="richOut" />-->
-<!--    </root>-->
+    <root level="debug">
+        <appender-ref ref="richOut" />
+    </root>
 
 </configuration>

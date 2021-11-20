@@ -2,6 +2,7 @@ package org.richard.home.servlets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.exception.InvalidInputException;
 import org.richard.home.model.Player;
 import org.richard.home.service.PlayerService;
@@ -19,20 +20,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@Component
 public class PlayerServlet extends HttpServlet {
 
     Logger log = LoggerFactory.getLogger(PlayerServlet.class);
     private ObjectMapper objectMapper;
     private PlayerService playerService;
 
-    public PlayerServlet() {
-    }
-
-    public void setObjectMapper(ObjectMapper objectMapper) {
+    @Autowired
+    public PlayerServlet(ObjectMapper objectMapper, PlayerService playerService) {
         this.objectMapper = objectMapper;
-    }
-
-    public void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
     }
 
@@ -121,9 +118,9 @@ public class PlayerServlet extends HttpServlet {
         try (BufferedReader bin = req.getReader()){
             String playerStr = readRequestBody(bin);
             Player newPlayer = mapToPlayer(playerStr);
-            boolean result = playerService.savePlayer(newPlayer);
-            log.info("result of call to playerService.savePlayer was {}", result);
-            if (result){
+            Player savedPlayer = playerService.savePlayer(newPlayer);
+            log.info("result of call to playerService.savePlayer was {}", savedPlayer != null);
+            if (savedPlayer != null){
                 resp.setStatus(HttpServletResponse.SC_CREATED);
                 out.write(new StringBuilder(content).insert(173, newPlayer.toString()).toString().getBytes());
             } else {
@@ -139,6 +136,10 @@ public class PlayerServlet extends HttpServlet {
             log.error(e.getClass().getName());
             log.error(Arrays.toString(e.getStackTrace()));
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("error with processing player".getBytes());
+        } catch (DatabaseAccessFailed de) {
+            log.error(de.getStackTrace().toString());
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.write("error with processing player".getBytes());
         } finally {
             out.flush();

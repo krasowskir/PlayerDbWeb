@@ -2,6 +2,7 @@ package org.richard.home.dao;
 
 import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.exception.NotFoundException;
+import org.richard.home.model.Address;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
     private static final String PERSIST_PLAYER = "INSERT INTO PLAYERS VALUES (DEFAULT, ?, ?)";
     private static final String FIND_PLAYERS_BY_AGE = "SELECT * FROM PLAYERS WHERE ALTER = ?";
     private static final String UPDATE_PLAYER = "UPDATE PLAYERS SET FIRST_NAME = ?, ALTER = ? WHERE FIRST_NAME = ?";
+    private static final String SAVE_PLAYER_LIVES_IN = "INSERT INTO LIVES_IN VALUES (?, ?)";
 
     private DataSource master;
     private DataSource slave;
@@ -47,7 +49,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
             }
         } catch (SQLException e) {
             log.error(e.getClass().getName());
-            throw new DatabaseAccessFailed(String.format("player %s not found in db", name), e);
+            throw new NotFoundException(String.format("player %s not found in db", name), e);
         }
     }
 
@@ -72,17 +74,24 @@ public class PostgresPlayerDAO implements PlayerDAO {
 
 
     @Override
-    public synchronized boolean savePlayer(Player toSave) throws DatabaseAccessFailed {
+    public synchronized int savePlayer(Player toSave) throws DatabaseAccessFailed {
         log.debug("savePlayer with name {} and alter {}", toSave.getName(), toSave.getAlter());
         int updRows = 0;
         try (Connection con = this.master.getConnection()) {
             log.debug("connection established? : {}", con.isValid(200));
             logWarningsOfConnection(con);
-            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER)) {
+            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER, Statement.RETURN_GENERATED_KEYS)) {
                 pS.setString(1, toSave.getName());
                 pS.setInt(2, toSave.getAlter());
                 log.debug(pS.toString());
                 updRows = pS.executeUpdate();
+                try (ResultSet genKeys = pS.getGeneratedKeys()){
+                    if (genKeys.next() && updRows > 0){
+                        return genKeys.getInt(1);
+                    } else {
+                        throw new DatabaseAccessFailed("resultSet generatedKeys.next was false");
+                    }
+                }
             }
         } catch (SQLException e) {
             log.error(e.getClass().getName());
@@ -90,14 +99,12 @@ public class PostgresPlayerDAO implements PlayerDAO {
             throw new DatabaseAccessFailed("database access while savePlayer", e);
         }
 
-        return updRows > 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override
     public synchronized boolean updatePlayer(Player toBe, String nameWhere) throws DatabaseAccessFailed {
         log.debug("updatePlayer with name {} and alter {}", toBe.getName(), toBe.getAlter());
         int updRows = 0;
-//        try (Connection con = this.slave.getConnection()) { PROBLEME BEIM TESTEN!!!
         try (Connection con = this.master.getConnection()) {
             log.debug("connection established? : {}", con.isValid(200));
             logWarningsOfConnection(con);
@@ -116,12 +123,35 @@ public class PostgresPlayerDAO implements PlayerDAO {
         return updRows > 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
+    @Override
+    public boolean savePlayerLivesIn(Player toSave, Address whereLive) throws DatabaseAccessFailed {
+        log.debug("savePlayerLivesIn with name {} and address {}", toSave.getName(), whereLive.toString());
+        int updRows = 0;
+        try (Connection con = this.master.getConnection()) {
+            log.debug("connection established? : {}", con.isValid(200));
+            logWarningsOfConnection(con);
+            try (PreparedStatement pS = con.prepareStatement(SAVE_PLAYER_LIVES_IN,ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
+                pS.setInt(1, toSave.getId());
+                pS.setInt(2, whereLive.getId());
+                log.debug(pS.toString());
+                updRows = pS.executeUpdate();
+            }
+        } catch (SQLException e) {
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            throw new DatabaseAccessFailed("database access while savePlayerLivesIn", e);
+        }
+        return updRows > 0 ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     private Player mapResultSetToPlayer(ResultSet rs, String name) throws SQLException {
         if (!rs.next()) {
             throw new NotFoundException(String.format("player with name %s not found!", name));
         }
-        // FORGOT TO CLOE THE ResultSet rs!!!
-        return new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+        // FORGOT TO CLOSE THE ResultSet rs!!!
+        Player tmpPlayer = new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+        tmpPlayer.setId(rs.getInt("id"));
+        return tmpPlayer;
     }
 
     private List<Player> mapResultSetToList(ResultSet rs, int alter) throws SQLException {

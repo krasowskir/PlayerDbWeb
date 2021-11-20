@@ -4,14 +4,18 @@ import java.util.Objects;
 
 public class Address {
 
-    private long id;
+    private int id;
     private String city;
     private String street;
     private String plz;
     private Country country;
 
-    public long getId() {
+    public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getCity() {
@@ -47,10 +51,10 @@ public class Address {
     }
 
     public Address(String city, String street, String plz, Country country) {
-        this(Double.valueOf(Math.random()).longValue(), city, street, plz, country);
+        this(Double.valueOf(Math.random()).intValue(), city, street, plz, country);
     }
 
-    public Address(long id, String city, String street, String plz, Country country) {
+    public Address(int id, String city, String street, String plz, Country country) {
         this.id = id;
         this.city = city;
         this.street = street;
@@ -66,21 +70,19 @@ public class Address {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Address address = (Address) o;
-        return Objects.equals(city, address.city) &&
-                Objects.equals(street, address.street) &&
-                Objects.equals(plz, address.plz) &&
-                country == address.country;
+        return id == address.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(city, street, plz, country);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
         return "Address{" +
-                "city='" + city + '\'' +
+                "id=" + id +
+                ", city='" + city + '\'' +
                 ", street='" + street + '\'' +
                 ", plz='" + plz + '\'' +
                 ", country=" + country +

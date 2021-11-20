@@ -7,7 +7,7 @@ public interface AddressDAO {
 
     Address getAddress(long id) throws DatabaseAccessFailed;
 
-    boolean saveAddress(Address toSave) throws DatabaseAccessFailed;
+    int saveAddress(Address toSave) throws DatabaseAccessFailed;
 
     boolean updateAddress(Address toBe, long whereId) throws DatabaseAccessFailed;
 

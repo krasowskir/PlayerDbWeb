@@ -3,6 +3,8 @@ package org.richard.home.dao
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
 import org.h2.jdbcx.JdbcDataSource
+import org.richard.home.exception.DatabaseAccessFailed
+import org.richard.home.exception.NotFoundException
 import org.richard.home.model.Address
 import org.richard.home.model.Country
 import org.slf4j.Logger
@@ -12,13 +14,21 @@ import spock.lang.Execution
 import spock.lang.Shared
 import spock.lang.Specification
 
+import javax.sql.DataSource
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.SQLException
+
 @Execution(ExecutionMode.SAME_THREAD)
 class PostgresAddressDAOSpec extends Specification {
 
-    Logger log = LoggerFactory.getLogger(PostgresAddressDAOSpec.class);
+    private static Logger log = LoggerFactory.getLogger(PostgresAddressDAOSpec.class);
 
     @Shared
     def dataSource
+
+    @Shared
+    def con
 
     def setup() {
 
@@ -28,14 +38,18 @@ class PostgresAddressDAOSpec extends Specification {
         dataSource.password = 'test123'
         dataSource.url = "jdbc:h2:mem:playerdb;MODE=PostgreSQL"
 
-        log.info('connection valid?: {}', dataSource.getConnection().isValid(100))
+        con = dataSource.getConnection()
+        log.info('connection valid?: {}', con.isValid(100))
         def flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations(new Location('classpath:db/migration'))
                 .load()
-        def migrRes = flyway.migrate()
 
-        log.info('migration successful?: {}', migrRes.success)
+        log.info('migration successful?: {}', flyway.migrate().success)
+    }
+
+    def cleanup(){
+        con.close()
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
@@ -53,6 +67,44 @@ class PostgresAddressDAOSpec extends Specification {
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
+    def "calling getAddress throws NotFoundException for a not existing address"() {
+
+        given:
+        PostgresAddressDAO addressDAO = new PostgresAddressDAO(dataSource, dataSource)
+
+        when: 'id is valid and logic is correct'
+        def foundAddress = addressDAO.getAddress(100l)
+
+        then: 'because resultSet.next() is false'
+        thrown(NotFoundException)
+    }
+
+    def 'calling getAddress with a flawed dataSource'(){
+
+        given:
+        Connection mockedConnection = Mock(Connection) {
+            prepareStatement(_ as String, _ as Integer, _ as Integer) >> Mock(PreparedStatement) {
+                setLong(_ as Integer, _ as Long) >> {}
+                executeQuery() >> {
+                    throw new SQLException()
+                }
+            }
+        }
+        def mockedDataSource = Mock(DataSource) {
+            getConnection() >> mockedConnection
+        }
+
+        and: 'PostgressAddressDAO'
+        PostgresAddressDAO addressDAO = new PostgresAddressDAO(mockedDataSource, mockedDataSource)
+
+        when: ''
+        def foundAddress = addressDAO.getAddress(2l)
+
+        then: 'SQLException is mapped to DatabaseAccessFailed exception'
+        thrown(DatabaseAccessFailed)
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'calling saveAddress stores a new address'(){
 
         given:
@@ -60,14 +112,38 @@ class PostgresAddressDAOSpec extends Specification {
         def toBeStoredAddr = new Address("Bonn", "Königswinterer Straße 419", '53123', Country.GERMANY)
 
         when:
-        def result = addressDAO.saveAddress(toBeStoredAddr)
+        def resultId = addressDAO.saveAddress(toBeStoredAddr)
 
         then:
-        result
+        resultId != null
 
         and:
-        def existingAddr = addressDAO.getAddress(4)
+        def existingAddr = addressDAO.getAddress(resultId)
         existingAddr.city == 'Bonn'
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
+    def 'calling saveAddress with a flawed dataSource'(){
+
+        given:
+        Connection mockedConnection = Mock(Connection) {
+            prepareStatement(_ as String, _ as Integer) >> Mock(PreparedStatement) {
+                setString(_ as Integer, _ as String) >> {}
+                executeUpdate() >> {
+                    throw new SQLException()
+                }
+            }
+        }
+        def mockedDataSource = Mock(DataSource) {
+            getConnection() >> mockedConnection
+        }
+        PostgresAddressDAO addressDAO = new PostgresAddressDAO(mockedDataSource, mockedDataSource)
+        def toBeStoredAddr = new Address("Bonn", "Königswinterer Straße 419", '53123', Country.GERMANY)
+
+        when:
+        addressDAO.saveAddress(toBeStoredAddr)
+
+        then:
+        thrown(DatabaseAccessFailed)
+    }
 }

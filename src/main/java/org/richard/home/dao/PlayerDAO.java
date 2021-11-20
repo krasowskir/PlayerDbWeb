@@ -1,6 +1,7 @@
 package org.richard.home.dao;
 
 import org.richard.home.exception.DatabaseAccessFailed;
+import org.richard.home.model.Address;
 import org.richard.home.model.Player;
 
 import java.util.List;
@@ -11,7 +12,9 @@ public interface PlayerDAO {
 
     List<Player> getPlayerByAlter(int alter) throws DatabaseAccessFailed;
 
-    boolean savePlayer(Player toSave) throws DatabaseAccessFailed;
+    int savePlayer(Player toSave) throws DatabaseAccessFailed;
 
     boolean updatePlayer(Player toBe, String nameWhere) throws DatabaseAccessFailed;
+
+    boolean savePlayerLivesIn(Player toSave, Address whereLive) throws DatabaseAccessFailed;
 }

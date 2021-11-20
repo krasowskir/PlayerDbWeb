@@ -2,10 +2,6 @@ package org.richard.home.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
-import org.richard.home.dao.AddressDAO;
-import org.richard.home.dao.PlayerDAO;
-import org.richard.home.service.PlayerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,11 +51,5 @@ public class MyConfiguration {
         dataSource.setPassword("test123");
 
         return dataSource;
-    }
-
-    @Bean
-    @Autowired
-    public PlayerService playerService(PlayerDAO playerDAO, AddressDAO addressDAO){
-        return new PlayerService(playerDAO, addressDAO);
     }
 }

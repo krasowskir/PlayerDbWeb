@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.richard.home" level="ERROR">
+    <logger name="org.richard.home" level="DEBUG">
         <appender-ref ref="richOut" />
     </logger>
 
@@ -18,6 +18,10 @@
     </logger>
 
     <logger name="org.postgresql" level="debug">
+        <appender-ref ref="richOut" />
+    </logger>
+
+    <logger name="org.flywaydb.core" level="debug">
         <appender-ref ref="richOut" />
     </logger>
 

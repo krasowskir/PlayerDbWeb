@@ -9,16 +9,20 @@ import org.richard.home.model.Address;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class PlayerService {
     Logger log = LoggerFactory.getLogger(PlayerService.class);
 
     private PlayerDAO playerDAO;
     private AddressDAO addressDAO;
 
+    @Autowired
     public PlayerService(PlayerDAO playerDAO, AddressDAO addressDAO) {
         this.playerDAO = playerDAO;
         this.addressDAO = addressDAO;
@@ -35,7 +39,7 @@ public class PlayerService {
             return foundPlayer;
         } catch (NotFoundException | DatabaseAccessFailed e){
             log.warn("no found players for name {}. Will return unknown player.", name);
-            return new Player("unknown", 0);
+            throw new NotFoundException();
         }
     }
 
@@ -50,19 +54,20 @@ public class PlayerService {
     }
 
 
-    public boolean savePlayer(Player toSave) {
+    public Player savePlayer(Player toSave) throws DatabaseAccessFailed {
         log.debug("entering savePlayer with player {}", toSave);
         if (toSave == null){
             throw new InvalidInputException("Player cannot be null");
         }
         boolean result;
         try {
-            result = this.playerDAO.savePlayer(toSave);
-            log.info("stored player {} successfully: {}", toSave, result);
-            return result;
+            int genKey = this.playerDAO.savePlayer(toSave);
+            toSave.setId(genKey);
+            log.info("stored player {} successfully!", toSave);
+            return toSave;
         } catch (DatabaseAccessFailed de){
             log.warn("saving player failed", de);
-            return false;
+            throw de;
         }
     }
 
@@ -82,16 +87,18 @@ public class PlayerService {
         }
     }
 
-    public boolean saveAddress(Address toSave){
+    public boolean saveAddressForPlayer(Player player, Address toSave){
         log.debug("entering saveAddress with Address {}", toSave);
-        if (toSave == null){
-            throw new InvalidInputException("Address cannot be null");
+        if (toSave == null || player == null){
+            throw new InvalidInputException("Address or player cannot be null");
         }
-        boolean result;
+        boolean  resultLivesIn;
         try {
-            result = this.addressDAO.saveAddress(toSave);
-            log.info("stored address {} successfully: {}", toSave, result);
-            return result;
+            int storedId = this.addressDAO.saveAddress(toSave);
+            toSave.setId(storedId);
+            resultLivesIn = this.playerDAO.savePlayerLivesIn(player, toSave);
+            log.info("stored address {} for player {} successfully: {}", toSave, player, resultLivesIn);
+            return resultLivesIn;
         } catch (DatabaseAccessFailed de){
             log.warn("saving address failed", de);
             return false;

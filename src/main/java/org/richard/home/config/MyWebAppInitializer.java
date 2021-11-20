@@ -33,12 +33,11 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
         ObjectMapper objectMapper = (ObjectMapper)springContext.getBean("objectMapper", ObjectMapper.class);
         if (objectMapper == null) log.error("objectMapper is null");
 
-        PlayerServlet playerServlet = new PlayerServlet();
-        playerServlet.setPlayerService(playerService);
-        playerServlet.setObjectMapper(objectMapper);
+        PlayerServlet playerServlet = springContext.getBean("playerServlet", PlayerServlet.class);
 
         PlayerAddressServlet addressServlet = springContext.getBean("playerAddressServlet", PlayerAddressServlet.class);
         if (addressServlet == null) log.error("addressServlet is null");
+
         addressServlet.setTemplateEngine(provideTemplateEngine(servletContext));
 
         ServletRegistration.Dynamic playerS = servletContext.addServlet("mein", playerServlet);

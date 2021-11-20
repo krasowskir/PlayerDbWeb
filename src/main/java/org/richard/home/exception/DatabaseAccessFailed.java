@@ -8,6 +8,10 @@ public class DatabaseAccessFailed extends Exception {
         super("database access failed to postgres");
     }
 
+    public DatabaseAccessFailed(String message) {
+        super(message);
+    }
+
     public DatabaseAccessFailed(SQLException message) {
         super(message);
     }
