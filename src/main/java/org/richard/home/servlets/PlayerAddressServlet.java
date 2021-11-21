@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.richard.home.model.Address;
 import org.richard.home.model.Country;
 import org.richard.home.model.Player;
+import org.richard.home.model.dto.PlayerWithAddress;
 import org.richard.home.service.PlayerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,6 @@ public class PlayerAddressServlet extends HttpServlet {
         }
     }
 
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("req reached doPost PlayerAddressServlet with session info: {}, {}",
@@ -79,12 +79,18 @@ public class PlayerAddressServlet extends HttpServlet {
 
             Address tmpAddr = populateAddressWithFormData(req);
             boolean result = playerService.saveAddressForPlayer(foundPlayer, tmpAddr);
-
             log.debug("result success?: {}", result);
 
+            PlayerWithAddress model = new PlayerWithAddress(foundPlayer.getName(), String.valueOf(foundPlayer.getAlter()),
+                    tmpAddr.getCity(), tmpAddr.getStreet(), tmpAddr.getPlz(), tmpAddr.getCountry().getValue());
+
+            session.setAttribute("model", model);
+
             WebContext context = new WebContext(req, resp, getServletContext());
-            context.setVariable("player", foundPlayer);
-            templateEngine.process("players", context, resp.getWriter());
+            context.setVariable("model", model);
+            templateEngine.process("playerOverview", context);
+
+            resp.sendRedirect("playerOverview");
         }
     }
 

@@ -1,0 +1,52 @@
+<!Doctype html>
+<html lang="en">
+<head>
+    <meta content="text/html" charset="UTF-8">
+    <title>Player profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <main>
+        <div class="container-fluid mb-3">
+            <div class="row">
+                <h1>Playeroverview</h1>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    image
+                </div>
+                <div class="mx-4 my-4 px-5 py-5 bg-light col-md-6">
+                    <div>
+                        Name <p data-th-text="${model.name}"></p>
+                    </div>
+                    <div>
+                        Alter <p data-th-text="${model.age}"></p>
+                    </div>
+                    <div>
+                        Straße <p data-th-text="${model.street}"></p>
+                    </div>
+                    <div>
+                        Stadt <p data-th-text="${model.city}"></p>
+                    </div>
+                    <div>
+                        Plz <p data-th-text="${model.plz}"></p>
+                    </div>
+                    <div>
+                        Land <p data-th-text="${model.country}"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="container">
+                    <div class="justify-content-md-right btn-group px-1">
+                        <button class="btn btn-primary">update</button>
+                        <button class="btn btn-danger">delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

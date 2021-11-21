@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-import java.io.*;
-import java.net.MalformedURLException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -93,21 +94,6 @@ public class PlayerServlet extends HttpServlet {
 
     }
 
-    private void provideResponse(HttpServletResponse resp, String sessVal, List<Player> foundPlayers) throws IOException {
-        OutputStream out = resp.getOutputStream();
-        resp.setContentType("text/html");
-
-        resp.setStatus(HttpServletResponse.SC_OK);
-        String content = provideHtmlTemplate();
-        if (foundPlayers != null && foundPlayers.size() > 0) {
-            out.write(new StringBuilder(content).insert(173, List.of(foundPlayers).toString()).toString().getBytes());
-            out.flush();
-        } else {
-            out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
-            out.flush();
-        }
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String[]> params = req.getParameterMap();
@@ -145,25 +131,6 @@ public class PlayerServlet extends HttpServlet {
             out.flush();
             out.close();
         }
-    }
-
-    private String provideHtmlTemplate() {
-        try {
-            String pathIndxHtml = "/WEB-INF/templates/index.html";
-            return new String(Files.readAllBytes(Path.of(getServletContext().getResource(pathIndxHtml).toURI())));
-        } catch (URISyntaxException | IOException e){
-            log.error ("{} by looking for index.html",e.getClass().getName());
-        }
-        return "";
-    }
-
-    private String readRequestBody(BufferedReader bin) throws IOException {
-        char[] data = new char[1024];
-        StringBuilder strB = new StringBuilder();
-        while (bin.read(data) != -1){
-            strB.append(data);
-        }
-        return strB.toString();
     }
 
     @Override
@@ -211,7 +178,41 @@ public class PlayerServlet extends HttpServlet {
         super.doDelete(req, resp);
     }
 
-    public Player mapToPlayer(String from) throws JsonProcessingException {
+    private void provideResponse(HttpServletResponse resp, String sessVal, List<Player> foundPlayers) throws IOException {
+        OutputStream out = resp.getOutputStream();
+        resp.setContentType("text/html");
+
+        resp.setStatus(HttpServletResponse.SC_OK);
+        String content = provideHtmlTemplate();
+        if (foundPlayers != null && foundPlayers.size() > 0) {
+            out.write(new StringBuilder(content).insert(173, List.of(foundPlayers).toString()).toString().getBytes());
+            out.flush();
+        } else {
+            out.write(new StringBuilder(content).insert(173, sessVal).toString().getBytes());
+            out.flush();
+        }
+    }
+
+    private Player mapToPlayer(String from) throws JsonProcessingException {
         return objectMapper.readValue(from, Player.class);
+    }
+
+    private String provideHtmlTemplate() {
+        try {
+            String pathIndxHtml = "/WEB-INF/templates/index.html";
+            return new String(Files.readAllBytes(Path.of(getServletContext().getResource(pathIndxHtml).toURI())));
+        } catch (URISyntaxException | IOException e){
+            log.error ("{} by looking for index.html",e.getClass().getName());
+        }
+        return "";
+    }
+
+    private String readRequestBody(BufferedReader bin) throws IOException {
+        char[] data = new char[1024];
+        StringBuilder strB = new StringBuilder();
+        while (bin.read(data) != -1){
+            strB.append(data);
+        }
+        return strB.toString();
     }
 }
