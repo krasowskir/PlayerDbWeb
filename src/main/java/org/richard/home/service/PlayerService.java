@@ -2,6 +2,7 @@ package org.richard.home.service;
 
 import org.richard.home.dao.AddressDAO;
 import org.richard.home.dao.PlayerDAO;
+import org.richard.home.dao.PostgresAddressDAO;
 import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.exception.InvalidInputException;
 import org.richard.home.exception.NotFoundException;
@@ -12,12 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class PlayerService {
-    Logger log = LoggerFactory.getLogger(PlayerService.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayerService.class);
 
     private PlayerDAO playerDAO;
     private AddressDAO addressDAO;
@@ -53,7 +56,6 @@ public class PlayerService {
         }
     }
 
-
     public Player savePlayer(Player toSave) throws DatabaseAccessFailed {
         log.debug("entering savePlayer with player {}", toSave);
         if (toSave == null){
@@ -87,21 +89,27 @@ public class PlayerService {
         }
     }
 
-    public boolean saveAddressForPlayer(Player player, Address toSave){
+    public boolean saveAddressForPlayer(Player player, Address toSave) throws SQLException {
         log.debug("entering saveAddress with Address {}", toSave);
         if (toSave == null || player == null){
             throw new InvalidInputException("Address or player cannot be null");
         }
+        Connection connection = ((PostgresAddressDAO)addressDAO).getWriteDataSource().getConnection();
+        connection.setAutoCommit(false);
         boolean  resultLivesIn;
         try {
             int storedId = this.addressDAO.saveAddress(toSave);
             toSave.setId(storedId);
             resultLivesIn = this.playerDAO.savePlayerLivesIn(player, toSave);
             log.info("stored address {} for player {} successfully: {}", toSave, player, resultLivesIn);
+            connection.commit();
             return resultLivesIn;
         } catch (DatabaseAccessFailed de){
             log.warn("saving address failed", de);
+            connection.rollback();
             return false;
+        } finally {
+            connection.close();
         }
     }
 

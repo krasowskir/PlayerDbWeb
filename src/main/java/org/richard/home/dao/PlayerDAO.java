@@ -5,6 +5,7 @@ import org.richard.home.model.Address;
 import org.richard.home.model.Player;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PlayerDAO {
 
@@ -13,6 +14,8 @@ public interface PlayerDAO {
     List<Player> getPlayerByAlter(int alter) throws DatabaseAccessFailed;
 
     int savePlayer(Player toSave) throws DatabaseAccessFailed;
+
+    Map<String, Integer> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed;
 
     boolean updatePlayer(Player toBe, String nameWhere) throws DatabaseAccessFailed;
 

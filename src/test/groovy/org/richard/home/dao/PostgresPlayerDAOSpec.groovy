@@ -17,7 +17,9 @@ import spock.lang.Specification
 
 import javax.sql.DataSource
 import java.sql.Connection
+import java.sql.DriverManager
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 import java.sql.SQLException
 
 /*
@@ -222,6 +224,24 @@ class PostgresPlayerDAOSpec extends Specification {
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
+    def 'calling savePlayerList stores all players in the list'() {
+
+        log.info('PostgresPlayerDAO can persist a player')
+
+        given: 'the postgresPlayerDAO'
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+
+        and:
+        def playerList = [new Player('Toni', 29), new Player('Katja', 29)]
+
+        when: 'calling savePlayer with a valid player'
+        def playerNamesWithIds = postgresPlayerDAO.savePlayerList(new ArrayList<Player>(playerList))
+
+        then:
+        playerNamesWithIds.size() == 2
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
     def 'calling savePlayerLivesIn stores an address and then the player lives'() {
 
         log.info('PostgresPlayerDAO can persist a player')
@@ -242,6 +262,39 @@ class PostgresPlayerDAOSpec extends Specification {
 
         then:
         success
+
+        where:
+        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
+    def 'transaction mechanism in savePlayerLivesIn prevents savings in the lives_in table'() {
+
+        log.info('PostgresPlayerDAO can persist a player')
+
+        given: 'the postgresPlayerDAO with a flawed statement'
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+        PostgresPlayerDAO.SAVE_PLAYER_LIVES_IN = 'INS INTO LIVES_IN VALUES (?, ?)'
+
+        and: 'a simulated persisted address (id = 1 already exists in db)'
+        def address = new Address()
+        address.id = 1
+
+        and: 'a successfully saved player in the db'
+        def playerId = postgresPlayerDAO.savePlayer(fromPlayer)
+        fromPlayer.id = playerId
+
+        when: 'calling savePlayerLivesIn with a saved player and a persisted address'
+        try {
+            postgresPlayerDAO.savePlayerLivesIn(fromPlayer, address)
+        } catch(Exception e){}
+
+        then: 'the operation breaks and no entry is stored in LIVES_IN table'
+        try(Connection conn = dataSource.getConnection()){
+            PreparedStatement ps = conn.prepareStatement("select * from LIVES_IN")
+            ResultSet rs = ps.executeQuery()
+            !rs.next() //has no entries
+        }
 
         where:
         fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]

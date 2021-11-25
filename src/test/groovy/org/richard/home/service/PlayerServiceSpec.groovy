@@ -128,6 +128,18 @@ class PlayerServiceSpec extends Specification {
     }
 
     def 'saveAddressForPlayer saves the address and player information'(){
+        given:
+        def mockedAddressDAO = Mock(AddressDAO.class)
+        def mockedPlayerDAO = Mock(PlayerDAO.class){
+            1 * savePlayer(_ as Player) >> 1
+        }
 
+        def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
+
+        when:
+        def result = playerService.savePlayer(new Player('richard', 30))
+
+        then:
+        result != 0
     }
 }

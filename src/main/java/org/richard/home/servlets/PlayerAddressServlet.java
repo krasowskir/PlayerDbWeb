@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.*;
 
 @Component
@@ -78,7 +79,12 @@ public class PlayerAddressServlet extends HttpServlet {
             Player foundPlayer = playerService.fetchSinglePlayer(name);
 
             Address tmpAddr = populateAddressWithFormData(req);
-            boolean result = playerService.saveAddressForPlayer(foundPlayer, tmpAddr);
+            boolean result = false;
+            try {
+                result = playerService.saveAddressForPlayer(foundPlayer, tmpAddr);
+            } catch (SQLException e) {
+                log.error("transactional exception");
+            }
             log.debug("result success?: {}", result);
 
             PlayerWithAddress model = new PlayerWithAddress(foundPlayer.getName(), String.valueOf(foundPlayer.getAlter()),
@@ -108,7 +114,12 @@ public class PlayerAddressServlet extends HttpServlet {
             Player foundPlayer = playerService.fetchSinglePlayer(name);
 
             Address tmpAddr = populateAddressWithFormData(req);
-            boolean result = playerService.saveAddressForPlayer(foundPlayer, tmpAddr);
+            boolean result = false;
+            try {
+                result = playerService.saveAddressForPlayer(foundPlayer, tmpAddr);
+            } catch (SQLException e) {
+                log.error("transactional exception");
+            }
 
             log.debug("result success?: {}", result);
 

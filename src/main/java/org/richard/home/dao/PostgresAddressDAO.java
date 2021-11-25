@@ -21,6 +21,10 @@ public class PostgresAddressDAO implements AddressDAO {
     private DataSource readDataSource;
     private DataSource writeDataSource;
 
+    public DataSource getWriteDataSource() {
+        return writeDataSource;
+    }
+
     private static String FIND_ADDRESS_BY_ID = "SELECT * FROM ADDRESSES WHERE ID = ?";
     private static String SAVE_ADDRESS = "INSERT INTO ADDRESSES VALUES (default, ?, ?, ?, ?)";
 
@@ -49,24 +53,22 @@ public class PostgresAddressDAO implements AddressDAO {
 
     @Override
     public int saveAddress(Address toSave) throws DatabaseAccessFailed {
-        int updtRows = 0;
         try (Connection con = writeDataSource.getConnection()){
+            con.setAutoCommit(false);
             try (PreparedStatement pS = con.prepareStatement(SAVE_ADDRESS, Statement.RETURN_GENERATED_KEYS)){
                 pS.setString(1, toSave.getCity());
                 pS.setString(2, toSave.getStreet());
                 pS.setString(3, toSave.getPlz());
                 pS.setString(4, toSave.getCountry().toString());
-                updtRows = pS.executeUpdate();
-                if (updtRows > 0){
-                    try (ResultSet rsGenKeys = pS.getGeneratedKeys()){
-                        if (rsGenKeys.next()){
-                            return rsGenKeys.getInt(1);
-                        } else {
-                            throw new SQLException("no id obtained!");
-                        }
+                pS.executeUpdate();
+                con.commit();
+                log.debug("update successfule");
+                try (ResultSet rsGenKeys = pS.getGeneratedKeys()){
+                    if (rsGenKeys.next()){
+                        return rsGenKeys.getInt(1);
+                    } else {
+                        throw new SQLException("no id obtained!");
                     }
-                } else {
-                    throw new SQLException("no id obtained!");
                 }
             }
         } catch (SQLException e) {
@@ -87,7 +89,7 @@ public class PostgresAddressDAO implements AddressDAO {
 
     private Address mapResultSetToAddress(ResultSet rs, long id) throws SQLException {
         if (!rs.next()) {
-            throw new NotFoundException(String.format("player with name %s not found!", id));
+            throw new NotFoundException(String.format("address with id %s not found!", id));
         }
         return new Address(rs.getInt(1), rs.getString(2), rs.getString(3),
                 rs.getString(4), Country.valueOf(rs.getString(5)));
