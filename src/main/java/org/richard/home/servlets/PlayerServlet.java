@@ -72,6 +72,8 @@ public class PlayerServlet extends HttpServlet {
         if (req.getParameter("setcookie") != null) {
             Cookie cookie = new Cookie("myCookie", "richard-123");
             cookie.setMaxAge(30);
+            cookie.setHttpOnly(true);
+//            cookie.setSecure(true); nachdem wir https haben
             resp.addCookie(cookie);
         } else {
             Cookie[] cookies = req.getCookies();

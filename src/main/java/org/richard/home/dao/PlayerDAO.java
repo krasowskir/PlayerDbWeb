@@ -13,6 +13,8 @@ public interface PlayerDAO {
 
     List<Player> getPlayerByAlter(int alter) throws DatabaseAccessFailed;
 
+    Map<Player, Address> getAllPlayers() throws DatabaseAccessFailed;
+
     int savePlayer(Player toSave) throws DatabaseAccessFailed;
 
     Map<String, Integer> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed;

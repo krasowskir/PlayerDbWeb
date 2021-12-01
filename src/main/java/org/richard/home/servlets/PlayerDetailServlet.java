@@ -13,11 +13,11 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Component
-public class PlayerOverviewServlet extends HttpServlet {
+public class PlayerDetailServlet extends HttpServlet {
 
     private TemplateEngine templateEngine;
 
-    public PlayerOverviewServlet() {
+    public PlayerDetailServlet() {
     }
 
     public void setTemplateEngine(TemplateEngine templateEngine) {

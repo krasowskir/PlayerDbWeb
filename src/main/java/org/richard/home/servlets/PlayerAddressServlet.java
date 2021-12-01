@@ -147,9 +147,8 @@ public class PlayerAddressServlet extends HttpServlet {
 
     private void persistSessionInfosForPlayer(HttpServletRequest req, Player foundPlayer) {
         HttpSession session = req.getSession();
-        if (session.getAttribute("name") == null || session.getAttribute("name").equals("")){
-            session.setAttribute("name", foundPlayer.getName());
-            session.setAttribute("alter", foundPlayer.getAlter());
-        }
+        session.setAttribute("name", foundPlayer.getName());
+        session.setAttribute("alter", foundPlayer.getAlter());
+
     }
 }

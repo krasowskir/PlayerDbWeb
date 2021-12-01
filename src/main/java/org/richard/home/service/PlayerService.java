@@ -8,6 +8,7 @@ import org.richard.home.exception.InvalidInputException;
 import org.richard.home.exception.NotFoundException;
 import org.richard.home.model.Address;
 import org.richard.home.model.Player;
+import org.richard.home.model.dto.PlayerWithAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -54,6 +57,20 @@ public class PlayerService {
             log.warn("no found players for age {}. Will return empty list.", alter, ne);
             return List.of();
         }
+    }
+
+    public Optional<List<PlayerWithAddress>> getAllPlayers(){
+        List<PlayerWithAddress> playerList = new ArrayList<>();
+        try {
+            Map<Player, Address> playersWithAddresses = playerDAO.getAllPlayers();
+            playersWithAddresses.forEach((player, addr) -> {
+                playerList.add(new PlayerWithAddress(player.getName(), String.valueOf(player.getAlter()), addr.getCity(), 
+                        addr.getStreet(), addr.getPlz(), addr.getCountry().getValue()));
+            });
+        } catch (DatabaseAccessFailed databaseAccessFailed) {
+            log.error("error while getting all players");
+        }
+        return Optional.ofNullable(playerList);
     }
 
     public Player savePlayer(Player toSave) throws DatabaseAccessFailed {
@@ -111,7 +128,7 @@ public class PlayerService {
         } finally {
             connection.close();
         }
-    }
+    } 
 
     public Optional<Address> getAddressById(long id){
         log.debug("entering getAddressById with id {}", id);

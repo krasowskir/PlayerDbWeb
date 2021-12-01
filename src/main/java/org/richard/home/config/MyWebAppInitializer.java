@@ -1,10 +1,8 @@
 package org.richard.home.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaxxer.hikari.HikariDataSource;
-import org.richard.home.service.PlayerService;
 import org.richard.home.servlets.PlayerAddressServlet;
-import org.richard.home.servlets.PlayerOverviewServlet;
+import org.richard.home.servlets.PlayerDetailServlet;
+import org.richard.home.servlets.PlayerListOverviewServlet;
 import org.richard.home.servlets.PlayerServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,15 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
         AnnotationConfigApplicationContext springContext = new AnnotationConfigApplicationContext("org.richard.home");
         springContext.start();
 
-        PlayerServlet playerServlet = springContext.getBean("playerServlet", PlayerServlet.class);
-        PlayerAddressServlet addressServlet = springContext.getBean("playerAddressServlet", PlayerAddressServlet.class);
-        PlayerOverviewServlet playerOverviewServlet = springContext.getBean("playerOverviewServlet", PlayerOverviewServlet.class);
+        PlayerServlet playerServlet = springContext.getBean(PlayerServlet.class);
+        PlayerAddressServlet addressServlet = springContext.getBean(PlayerAddressServlet.class);
+        PlayerDetailServlet playerDetailServlet = springContext.getBean(PlayerDetailServlet.class);
+        PlayerListOverviewServlet playerListOverviewServlet = springContext.getBean(PlayerListOverviewServlet.class);
 
         this.templateEngine = provideTemplateEngine(servletContext);
         addressServlet.setTemplateEngine(templateEngine);
-        playerOverviewServlet.setTemplateEngine(templateEngine);
+        playerDetailServlet.setTemplateEngine(templateEngine);
+        playerListOverviewServlet.setTemplateEngine(templateEngine);
 
         ServletRegistration.Dynamic playerS = servletContext.addServlet("mein", playerServlet);
         playerS.addMapping("/mein");
@@ -43,19 +43,23 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
         ServletRegistration.Dynamic addressS = servletContext.addServlet("address", addressServlet);
         addressS.addMapping("/address");
 
-        ServletRegistration.Dynamic playerOverviewS = servletContext.addServlet("playerOverview", playerOverviewServlet);
+        ServletRegistration.Dynamic playerOverviewS = servletContext.addServlet("playerOverview", playerDetailServlet);
         playerOverviewS.addMapping("/playerOverview");
+
+        ServletRegistration.Dynamic playerListOverviewS = servletContext.addServlet("playerListOverviewServlet", playerListOverviewServlet);
+        playerListOverviewS.addMapping("/playerListOverview");
     }
 
     private TemplateEngine provideTemplateEngine(ServletContext servletContext){
-        ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
+        var templateResolver = new ServletContextTemplateResolver(servletContext);
         templateResolver.setTemplateMode(TemplateMode.HTML);
         templateResolver.setPrefix("/WEB-INF/templates/");
         templateResolver.setSuffix(".html");
-        templateResolver.setCacheTTLMs(Long.valueOf(3600000L));
+        templateResolver.setCacheTTLMs(3600000L);
+        templateResolver.setCharacterEncoding("utf-8");
         templateResolver.setCacheable(true);
 
-        TemplateEngine templateEngine = new TemplateEngine();
+        var templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(templateResolver);
         return  templateEngine;
     }

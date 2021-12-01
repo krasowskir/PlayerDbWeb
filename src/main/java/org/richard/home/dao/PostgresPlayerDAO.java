@@ -3,6 +3,7 @@ package org.richard.home.dao;
 import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.exception.NotFoundException;
 import org.richard.home.model.Address;
+import org.richard.home.model.Country;
 import org.richard.home.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
     static String FIND_PLAYERS_BY_AGE = "SELECT * FROM PLAYERS WHERE ALTER = ?";
     static String UPDATE_PLAYER = "UPDATE PLAYERS SET FIRST_NAME = ?, ALTER = ? WHERE FIRST_NAME = ?";
     static String SAVE_PLAYER_LIVES_IN = "INSERT INTO LIVES_IN VALUES (?, ?)";
+    static String GET_ALL_PLAYERS = "SELECT P.*, A.* FROM PLAYERS P INNER JOIN LIVES_IN LI ON P.ID = LI.PLAYER_ID INNER JOIN ADDRESSES A ON LI.ADDRESS_ID = A.ID";
 
     private DataSource master;
     private DataSource slave;
@@ -67,6 +69,24 @@ public class PostgresPlayerDAO implements PlayerDAO {
             log.error(e.getClass().getName());
             log.error(Arrays.toString(e.getStackTrace()));
             throw new DatabaseAccessFailed(String.format("player with alter %d not found in db", alter), e);
+        }
+    }
+
+    @Override
+    public Map<Player, Address> getAllPlayers() throws DatabaseAccessFailed {
+        log.debug("entering getAllPlayers");
+        try (Connection con = this.slave.getConnection()) {
+            log.debug("connection established? : {}", con.isValid(200));
+            logWarningsOfConnection(con);
+            try (PreparedStatement pS = con.prepareStatement(GET_ALL_PLAYERS, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                log.debug(pS.toString());
+                ResultSet rs = pS.executeQuery();
+                return mapPlayersWithAddressesToList(rs);
+            }
+        } catch (SQLException e) {
+            log.error(e.getClass().getName());
+            log.error(Arrays.toString(e.getStackTrace()));
+            throw new DatabaseAccessFailed("players could not be fetched!", e);
         }
     }
 
@@ -201,6 +221,23 @@ public class PostgresPlayerDAO implements PlayerDAO {
             playerList.add(tmpPl);
         }
         return playerList;
+    }
+
+    private Map<Player, Address> mapPlayersWithAddressesToList(ResultSet rs) throws SQLException {
+        if (!rs.next()) {
+            throw new NotFoundException(String.format("players could not be fetched!"));
+        }
+        rs.beforeFirst();
+        Map<Player, Address> playersWithAddresses = new HashMap<>();
+        while (rs.next()) {
+            Player tmpPl = new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+            tmpPl.setId(rs.getInt("id"));
+            Address tmpAddr = new Address(rs.getInt("id"),rs.getString("city"),rs.getString("street"),
+                    rs.getString("plz"), Country.valueOf(rs.getString("country")));
+
+            playersWithAddresses.put(tmpPl, tmpAddr);
+        }
+        return playersWithAddresses;
     }
 
     private void logWarningsOfConnection(Connection con) throws SQLException {
