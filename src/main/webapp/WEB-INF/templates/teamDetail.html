@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html" charset="UTF-8">
+    <title>Team Detail Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style type="text/css">
+        #imgContainer{ width: 20rem; height: 20rem}
+    </style>
+
+</head>
+<body>
+    <main class="">
+        <header>
+            <nav>
+
+            </nav>
+        </header>
+        <article>
+            <div class="container">
+                <div class="row my-5">
+                    <div class="card bg-light p-5 rounded-5 col-md-9 ">
+                        <div class="px-4 py-4 " id="imgContainer">
+                            <img class="card-img-top" data-th-src="${logoBase64Encoded}">
+                        </div>
+                        <div class="card-body">
+                            <h1 class="card-title fw-bold" data-th-text="${{team.name}}"></h1>
+                            <p class="card-text">Sitz: Saebener Straße</p>
+                        </div>
+                    </div>
+
+                    <aside class="col-md-3">
+                        <h1 class="fw-bold">Sponsors</h1>
+                        <ul class="list-group">
+                            <li class="list-group-item">Quatar Airways</li>
+                            <li class="list-group-item">Adidas</li>
+                            <li class="list-group-item">Volkswagen</li>
+                        </ul>
+                    </aside>
+                </div>
+                <div class="row">
+                    <table class="table table-stripped my-4 col-md-6">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First</th>
+                            <th scope="col">Last</th>
+                            <th scope="col">Age</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Richard</td>
+                            <td>Krasowski</td>
+                            <td>30</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </article>
+
+        <footer class="container">
+            <div class="btn-group row" role="group">
+                <button type="button" class="btn btn-danger">update</button>
+                <button type="button" class="btn btn-warning">delete</button>
+                <button type="button" class="btn btn-success">add</button>
+            </div>
+        </footer>
+    </main>
+</body>
+</html>

@@ -1,4 +1,5 @@
 <configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <appender name="richOut" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] [%X{X-Correlation-Id}] %yellow(%C{1}): %msg%n%throwable</pattern>
@@ -6,6 +7,10 @@
     </appender>
 
     <logger name="org.richard.home" level="DEBUG">
+        <appender-ref ref="richOut" />
+    </logger>
+
+    <logger name="db.migration" level="debug">
         <appender-ref ref="richOut" />
     </logger>
 
@@ -21,9 +26,8 @@
         <appender-ref ref="richOut" />
     </logger>
 
-    <logger name="org.flywaydb.core" level="debug">
+    <logger name="org.flywaydb.core" level="DEBUG">
         <appender-ref ref="richOut" />
     </logger>
-
 
 </configuration>

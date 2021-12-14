@@ -1,9 +1,6 @@
 package org.richard.home.config;
 
-import org.richard.home.servlets.PlayerAddressServlet;
-import org.richard.home.servlets.PlayerDetailServlet;
-import org.richard.home.servlets.PlayerListOverviewServlet;
-import org.richard.home.servlets.PlayerServlet;
+import org.richard.home.servlets.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -31,11 +28,13 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
         PlayerAddressServlet addressServlet = springContext.getBean(PlayerAddressServlet.class);
         PlayerDetailServlet playerDetailServlet = springContext.getBean(PlayerDetailServlet.class);
         PlayerListOverviewServlet playerListOverviewServlet = springContext.getBean(PlayerListOverviewServlet.class);
+        TeamDetailServlet teamDetailServlet = springContext.getBean(TeamDetailServlet.class);
 
         this.templateEngine = provideTemplateEngine(servletContext);
         addressServlet.setTemplateEngine(templateEngine);
         playerDetailServlet.setTemplateEngine(templateEngine);
         playerListOverviewServlet.setTemplateEngine(templateEngine);
+        teamDetailServlet.setTemplateEngine(templateEngine);
 
         ServletRegistration.Dynamic playerS = servletContext.addServlet("mein", playerServlet);
         playerS.addMapping("/mein");
@@ -48,6 +47,10 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
 
         ServletRegistration.Dynamic playerListOverviewS = servletContext.addServlet("playerListOverviewServlet", playerListOverviewServlet);
         playerListOverviewS.addMapping("/playerListOverview");
+
+        ServletRegistration.Dynamic teamDetailS = servletContext.addServlet("teamDetailServlet", teamDetailServlet);
+        teamDetailS.addMapping("/teamDetail");
+
     }
 
     private TemplateEngine provideTemplateEngine(ServletContext servletContext){

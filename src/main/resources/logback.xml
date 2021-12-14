@@ -9,6 +9,10 @@
         <appender-ref ref="richOut" />
     </logger>
 
+    <logger name="db.migration" level="debug">
+        <appender-ref ref="richOut" />
+    </logger>
+
     <logger name="com.zaxxer" level="debug">
         <appender-ref ref="richOut" />
     </logger>

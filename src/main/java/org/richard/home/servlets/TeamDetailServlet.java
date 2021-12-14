@@ -1,7 +1,7 @@
 package org.richard.home.servlets;
 
-import org.richard.home.model.dto.PlayerWithAddress;
-import org.richard.home.service.PlayerService;
+import org.richard.home.model.Team;
+import org.richard.home.service.TeamService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,34 +15,38 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Component
-public class PlayerListOverviewServlet extends HttpServlet {
+public class TeamDetailServlet extends HttpServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(PlayerListOverviewServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(TeamDetailServlet.class);
 
-    private PlayerService playerService;
     private TemplateEngine templateEngine;
-
-    @Autowired
-    public PlayerListOverviewServlet(PlayerService playerService) {
-        this.playerService = playerService;
-    }
+    private TeamService teamService;
 
     public void setTemplateEngine(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
     }
 
+    @Autowired
+    public TeamDetailServlet(TeamService teamService) {
+        this.teamService = teamService;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        log.debug("received reaqquest on TeamDetailServlet GET endpoint");
 
-        List<PlayerWithAddress> playerList = this.playerService.getAllPlayers().get();
-
+        List<Team> foundTeams = teamService.getAllTeams();
+        Team bayernMuenchen = foundTeams.get(0);
+        String logoBase64Encoded = "data:image/png;base64, " + Base64.getEncoder().encodeToString(bayernMuenchen.getLogo());
         WebContext context = new WebContext(req, resp, getServletContext());
-        context.setVariable("allPlayers", playerList);
+        context.setVariable("team", bayernMuenchen);
+        context.setVariable("logoBase64Encoded", logoBase64Encoded);
         resp.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
-        templateEngine.process("playerListOverview", context, resp.getWriter());
+        templateEngine.process("teamDetail", context, resp.getWriter());
     }
 
     @Override
@@ -59,5 +63,4 @@ public class PlayerListOverviewServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.doDelete(req, resp);
     }
-
 }
