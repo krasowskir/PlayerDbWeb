@@ -38,14 +38,12 @@ public class V4__INSERT_TEAMS extends BaseJavaMigration {
     }
 
     public V4__INSERT_TEAMS() throws IOException {
-        Properties properties = new Properties();
-        properties.load(new ByteArrayInputStream(Files.readAllBytes(Path.of("target/classes/application.properties"))));
-        if (PLAYER_DATA_URL.equals("")){
+        if (PLAYER_DATA_URL == null || PLAYER_DATA_URL.equals("")){
+            Properties properties = new Properties();
+            properties.load(new ByteArrayInputStream(Files.readAllBytes(Path.of("target/classes/application.properties"))));
             PLAYER_DATA_URL = properties.getProperty("application.teamUrl");
         }
     }
-
-
 
     @Override
     public void migrate(Context context) throws Exception {
@@ -77,7 +75,7 @@ public class V4__INSERT_TEAMS extends BaseJavaMigration {
 
     public Team fetchTeamByIdFromApi(String id, Connection con) throws URISyntaxException, IOException, InterruptedException {
         HttpClient httpClient = HttpClient.newBuilder().build();
-        HttpRequest request = HttpRequest.newBuilder(new URI(BAYERN_TEAM_ID + "/" + id))
+        HttpRequest request = HttpRequest.newBuilder(new URI(PLAYER_DATA_URL + "/" + BAYERN_TEAM_ID))
                 .header("X-Auth-Token", "d912ec84ca93444b98587cd9f6809d04")
                 .GET()
                 .build();

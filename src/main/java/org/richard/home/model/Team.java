@@ -2,6 +2,7 @@ package org.richard.home.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -18,8 +19,6 @@ public class Team {
     private String email;
     private String venue;
     private String website;
-
-    @JsonAlias("venue")
     private String owner;
 
     public Team() {
@@ -71,6 +70,7 @@ public class Team {
         this.logo = logo;
     }
 
+    @JsonProperty("founded")
     public String getOwner() {
         return owner;
     }
