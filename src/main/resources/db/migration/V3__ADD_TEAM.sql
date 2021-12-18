@@ -33,4 +33,20 @@ create table coaches (
     primary key (trainerId, teamId)
 );
 
+ALTER TABLE TEAMS ADD COLUMN TLA VARCHAR(255);
+ALTER TABLE TEAMS ADD COLUMN ADDRESS VARCHAR(255);
+ALTER TABLE TEAMS ADD COLUMN PHONE VARCHAR(255);
+ALTER TABLE TEAMS ADD COLUMN WEBSITE VARCHAR(255);
+ALTER TABLE TEAMS ADD COLUMN EMAIL VARCHAR(255);
+ALTER TABLE TEAMS ADD COLUMN VENUE VARCHAR(255);
+
+create table under_contract (
+    teamId integer,
+    playerId integer,
+    constraint C_UC_FOREIGN_TEAM foreign key (teamId) references teams (id) on delete cascade,
+    constraint C_UC_FOREIGN_PLAYER foreign key (playerId) references players (id) on delete cascade,
+    primary key (teamId, playerId)
+);
+
+
 

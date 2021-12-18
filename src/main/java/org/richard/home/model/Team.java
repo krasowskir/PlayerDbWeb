@@ -1,23 +1,41 @@
 package org.richard.home.model;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Team {
     private int id;
+
     private String name;
     private int budget;
     private byte[] logo;
+    private String tla;
+    private String address;
+    private String phone;
+    private String email;
+    private String venue;
+    private String website;
+
+    @JsonAlias("venue")
     private String owner;
 
     public Team() {
     }
 
-    public Team(int id, String name, int budget, byte[] logo, String owner) {
+    public Team(int id, String name, int budget, byte[] logo, String tla, String address, String phone, String email, String venue, String website, String owner) {
         this.id = id;
         this.name = name;
         this.budget = budget;
         this.logo = logo;
+        this.tla = tla;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+        this.venue = venue;
+        this.website = website;
         this.owner = owner;
     }
 
@@ -61,6 +79,54 @@ public class Team {
         this.owner = owner;
     }
 
+    public String getTla() {
+        return tla;
+    }
+
+    public void setTla(String tla) {
+        this.tla = tla;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getVenue() {
+        return venue;
+    }
+
+    public void setVenue(String venue) {
+        this.venue = venue;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -80,7 +146,12 @@ public class Team {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", budget=" + budget +
-                ", logo=" + Arrays.toString(logo) +
+                ", tla='" + tla + '\'' +
+                ", address='" + address + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", venue='" + venue + '\'' +
+                ", website='" + website + '\'' +
                 ", owner='" + owner + '\'' +
                 '}';
     }
