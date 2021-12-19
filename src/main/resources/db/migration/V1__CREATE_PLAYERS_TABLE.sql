@@ -1,5 +1,5 @@
 create table players (
-    id serial primary key,
+    id integer primary key,
     first_name varchar(255),
     alter integer
 );
@@ -20,9 +20,17 @@ create table players (
 
 GRANT ALL ON players TO richard;
 
-insert into players values(default, 'richard', 30);
-insert into players values(default, 'arnold', 30);
-insert into players values(default, 'lidia', 33);
+ALTER TABLE PLAYERS RENAME COLUMN first_name TO name;
+ALTER TABLE PLAYERS ADD COLUMN position VARCHAR(255);
+ALTER TABLE PLAYERS ADD COLUMN date_of_birth DATE;
+ALTER TABLE PLAYERS ADD COLUMN country_of_birth VARCHAR(255);
+
+INSERT INTO PLAYERS VALUES(1, 'richard', 30, 'offender', '1991-06-20', 'LATVIA');
+INSERT INTO PLAYERS VALUES(2, 'arnold', 30, 'onTheBank', '1991-06-20', 'LATVIA');
+INSERT INTO PLAYERS VALUES(3, 'lidia', 33, 'midfield', '1988-04-30', 'LATVIA');
+
+
+
 
 
 

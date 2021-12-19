@@ -80,8 +80,7 @@ public class PlayerService {
         }
         boolean result;
         try {
-            int genKey = this.playerDAO.savePlayer(toSave);
-            toSave.setId(genKey);
+            this.playerDAO.savePlayer(toSave);
             log.info("stored player {} successfully!", toSave);
             return toSave;
         } catch (DatabaseAccessFailed de){

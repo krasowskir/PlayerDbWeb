@@ -37,7 +37,7 @@ public class PlayerListOverviewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        List<PlayerWithAddress> playerList = this.playerService.getAllPlayers().get();
+        List<PlayerWithAddress> playerList = this.playerService.getAllPlayers();
 
         WebContext context = new WebContext(req, resp, getServletContext());
         context.setVariable("allPlayers", playerList);

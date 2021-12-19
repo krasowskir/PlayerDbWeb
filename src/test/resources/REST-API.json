@@ -1,0 +1,214 @@
+{
+  "id": 5,
+  "name": "FC Bayern München",
+  "budget": 0,
+  "tla": "FCB",
+  "address": "Säbenerstr. 51 München 81547",
+  "phone": "+49 (089) 699310",
+  "email": "service-team@fcb.de",
+  "venue": "Allianz Arena",
+  "website": "http://www.fcbayern.de",
+  "owner": "1900",
+  "squad": [
+    {
+      "id":311,
+      "name":"Serge Gnabry",
+      "position":"Midfielder",
+      "dateOfBirth":"1995-07-14",
+      "countryOfBirth":"GERMANY",
+      "alter":26
+    },
+    {
+      "id":341,
+      "name":"Manuel Neuer",
+      "position":"Goalkeeper",
+      "dateOfBirth":"1986-03-27",
+      "countryOfBirth":"GERMANY",
+      "alter":35
+    },
+    {
+      "id":342,
+      "name":"Sven Ulreich",
+      "position":"Goalkeeper",
+      "dateOfBirth":"1988-08-03",
+      "countryOfBirth":"GERMANY",
+      "alter":33
+    },
+    {
+      "id":344,
+      "name":"Christian Früchtl",
+      "position":"Goalkeeper",
+      "dateOfBirth":"2000-01-28",
+      "countryOfBirth":"GERMANY",
+      "alter":21
+    },
+    {
+      "id":351,
+      "name":"Niklas Süle",
+      "position":"Defender",
+      "dateOfBirth":"1995-09-03",
+      "countryOfBirth":"GERMANY",
+      "alter":26
+    },
+    {
+      "id":359,
+      "name":"Joshua Kimmich",
+      "position":"Midfielder",
+      "dateOfBirth":"1995-02-08",
+      "countryOfBirth":"GERMANY",
+      "alter":26
+    },
+    {
+      "id":360,
+      "name":"Kingsley Coman",
+      "position":"Midfielder",
+      "dateOfBirth":"1996-06-13",
+      "countryOfBirth":"FRANCE",
+      "alter":25
+    },
+    {
+      "id":366,
+      "name":"Corentin Tolisso",
+      "position":"Midfielder",
+      "dateOfBirth":"1994-08-03",
+      "countryOfBirth":"FRANCE",
+      "alter":27
+    },
+    {
+      "id":370,
+      "name":"Thomas Müller",
+      "position":"Attacker",
+      "dateOfBirth":"1989-09-13",
+      "countryOfBirth":"GERMANY",
+      "alter":32
+    },
+    {
+      "id":371,
+      "name":"Robert Lewandowski",
+      "position":"Attacker",
+      "dateOfBirth":"1988-08-21",
+      "countryOfBirth":"POLAND",
+      "alter":33
+    },
+    {
+      "id":3181,
+      "name":"Leon Goretzka",
+      "position":"Midfielder",
+      "dateOfBirth":"1995-02-06",
+      "countryOfBirth":"GERMANY",
+      "alter":26
+    },
+    {
+      "id":3184,
+      "name":"Leroy Sané",
+      "position":"Attacker",
+      "dateOfBirth":"1996-01-11",
+      "countryOfBirth":"GERMANY",
+      "alter":25
+    },
+    {
+      "id":3364,
+      "name":"Benjamin Pavard",
+      "position":"Defender",
+      "dateOfBirth":"1996-03-28",
+      "countryOfBirth":"FRANCE",
+      "alter":25
+    },
+    {
+      "id":3365,
+      "name":"Lucas Hernández",
+      "position":"Defender",
+      "dateOfBirth":"1996-02-14",
+      "countryOfBirth":"FRANCE",
+      "alter":25
+    },
+    {
+      "id":4266,
+      "name":"Omar Richards",
+      "position":"Defender",
+      "dateOfBirth":"1998-02-15",
+      "countryOfBirth":"ENGLAND",
+      "alter":23
+    },
+    {
+      "id":6688,
+      "name":"Mickaël Cuisance",
+      "position":"Midfielder",
+      "dateOfBirth":"1999-08-16",
+      "countryOfBirth":"FRANCE",
+      "alter":22
+    },
+    {
+      "id":7963,
+      "name":"Maxim Choupo-Moting",
+      "position":"Attacker",
+      "dateOfBirth":"1989-03-23",
+      "countryOfBirth":"GERMANY",
+      "alter":32
+    },
+    {
+      "id":8353,
+      "name":"Bouna Sarr",
+      "position":"Midfielder",
+      "dateOfBirth":"1992-01-31",
+      "countryOfBirth":"FRANCE",
+      "alter":29
+    },
+    {
+      "id":9541,
+      "name":"Dayot Upamecano",
+      "position":"Defender",
+      "dateOfBirth":"1998-10-27",
+      "countryOfBirth":"FRANCE",
+      "alter":23
+    },
+    {
+      "id":9551,
+      "name": "Marcel Sabitzer",
+      "position": "Attacker",
+      "dateOfBirth":"1994-03-17",
+      "countryOfBirth":"AUSTRIA",
+      "alter":27
+    },
+    {
+      "id":21288,
+      "name":"Alphonso Davies",
+      "position":"Attacker",
+      "dateOfBirth":"2000-11-02",
+      "countryOfBirth":"GHANA",
+      "alter":21
+    },
+    {
+      "id":32710,
+      "name":"Marc Roca",
+      "position":"Midfielder",
+      "dateOfBirth":"1996-11-26",
+      "countryOfBirth":"SPAIN",
+      "alter":25
+    },
+    {
+      "id":122188,
+      "name":"Josip Stanišić",
+      "position":"Defender",
+      "dateOfBirth":"2000-04-02",
+      "countryOfBirth":"GERMANY",
+      "alter":21
+    },
+    {
+      "id":127127,
+      "name":"Nianzou Kouassi",
+      "position":"Defender",
+      "dateOfBirth":"2002-06-07",
+      "countryOfBirth":"FRANCE",
+      "alter":19
+    },
+    {
+      "id":144393,
+      "name":"Jamal Musiala",
+      "position":"Midfielder",
+      "dateOfBirth":"2003-02-26",
+      "countryOfBirth":"GERMANY",
+      "alter":18
+    }
+  ]
+}

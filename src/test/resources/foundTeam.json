@@ -1,0 +1,13 @@
+//Team
+{
+  "id": 5,
+  "name": "FC Bayern München",
+  "budget": 0,
+  "tla": "FCB",
+  "address": "Säbenerstr. 51 München 81547",
+  "phone": "+49 (089) 699310",
+  "email": "service-team@fcb.de",
+  "venue": "Allianz Arena",
+  "website": "http://www.fcbayern.de",
+  "owner": "1900"
+}

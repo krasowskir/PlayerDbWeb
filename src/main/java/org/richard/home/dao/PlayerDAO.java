@@ -17,7 +17,7 @@ public interface PlayerDAO {
 
     int savePlayer(Player toSave) throws DatabaseAccessFailed;
 
-    Map<String, Integer> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed;
+    List<Player> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed;
 
     boolean updatePlayer(Player toBe, String nameWhere) throws DatabaseAccessFailed;
 

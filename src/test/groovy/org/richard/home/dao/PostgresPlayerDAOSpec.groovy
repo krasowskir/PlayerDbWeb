@@ -17,10 +17,11 @@ import spock.lang.Specification
 
 import javax.sql.DataSource
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.time.LocalDate
+import java.time.Month
 
 /*
     ToDo: this class is an integration test, but it is treated as a unit test. As a consequence you can not utilize mvn
@@ -47,6 +48,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
         con = dataSource.getConnection()
         log.info('connection valid?: {}', con.isValid(100))
+
         def flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations(new Location('classpath:db/migration'))
@@ -59,6 +61,8 @@ class PostgresPlayerDAOSpec extends Specification {
     def cleanup(){
         con.close()
     }
+
+    
 
     @Execution(ExecutionMode.SAME_THREAD)
     def 'a valid player can be searched in postgresPlayerDAO'() {
@@ -76,6 +80,9 @@ class PostgresPlayerDAOSpec extends Specification {
         found.alter == 30
 
     }
+
+    //works
+    
 
     @Execution(ExecutionMode.SAME_THREAD)
     def 'trying to fetch a player with a flawed dataSource leads to DataAccessException'() {
@@ -106,6 +113,9 @@ class PostgresPlayerDAOSpec extends Specification {
         thrown(NotFoundException)
     }
 
+    //works
+    
+
     @Execution(ExecutionMode.SAME_THREAD)
     def 'player #name throws an NotFoundException in postgresPlayerDAO'() {
 
@@ -132,7 +142,7 @@ class PostgresPlayerDAOSpec extends Specification {
         given:
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
-        when: 'calling getPlayerByAlter'
+        when: 'calling getPlayerByAlter - remember, the new players from API are also 33'
         def foundPlayers = postgresPlayerDAO.getPlayerByAlter(33)
 
         then: 'always a list of players is returned'
@@ -140,7 +150,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
         and:
         with(foundPlayers) {
-            size() == 1
+            size() == 3
             get(0).getName() != null
         }
 
@@ -193,7 +203,8 @@ class PostgresPlayerDAOSpec extends Specification {
         playerId != 0
 
         where:
-        fromPlayer << [new Player('Toni', 29), new Player('Katja', 29)]
+        fromPlayer << [new Player(5,'Toni', 29, "midfield", LocalDate.of(1992, Month.NOVEMBER, 20), Country.GERMANY),
+                       new Player(6,'Katja', 29, "onTheBank", LocalDate.of(1993, Month.JULY, 1), Country.GERMANY)]
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
@@ -203,7 +214,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
         given: 'a flacky dataSource'
         Connection mockedConnection = Mock(Connection) {
-            prepareStatement(_ as String, _ as Integer) >> Mock(PreparedStatement) {
+            prepareStatement(_ as String) >> Mock(PreparedStatement) {
                 executeUpdate() >> {
                     throw new SQLException()
                 }
@@ -217,7 +228,7 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(mockedDataSource, mockedDataSource)
 
         when: 'calling savePlayer with a valid player'
-        postgresPlayerDAO.savePlayer(new Player('testi', 28))
+        postgresPlayerDAO.savePlayer(new Player(10,'testi', 29, "midfield", LocalDate.of(1992, Month.NOVEMBER, 20), Country.GERMANY))
 
         then:'an exception is thrown from service layer'
         thrown(DatabaseAccessFailed)
@@ -232,7 +243,11 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
         and:
-        def playerList = [new Player('Toni', 29), new Player('Katja', 29)]
+        def playerList = [new Player(5,'Toni', 29, "midfield", LocalDate.of(1992, Month.NOVEMBER, 20), Country.GERMANY),
+                          new Player(6,'Katja', 29, "onTheBank", LocalDate.of(1993, Month.JULY, 1), Country.GERMANY)]
+
+        playerList[0].setId(1)
+        playerList[1].setId(2)
 
         when: 'calling savePlayer with a valid player'
         def playerNamesWithIds = postgresPlayerDAO.savePlayerList(new ArrayList<Player>(playerList))
@@ -264,9 +279,10 @@ class PostgresPlayerDAOSpec extends Specification {
         success
 
         where:
-        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
+        fromPlayer << [new Player(4,'Richard', 30, "offender", LocalDate.of(1991, Month.JUNE, 20), Country.LATVIA),
+                       new Player(5,'Lidia', 33, "onTheBank", LocalDate.of(1988, Month.APRIL, 30), Country.LATVIA)]
     }
-
+    
     @Execution(ExecutionMode.SAME_THREAD)
     def 'transaction mechanism in savePlayerLivesIn prevents savings in the lives_in table'() {
 
@@ -297,7 +313,8 @@ class PostgresPlayerDAOSpec extends Specification {
         }
 
         where:
-        fromPlayer << [new Player('richard', 30), new Player('lidia', 33)]
+        fromPlayer << [new Player(4,'Richard', 30, "offender", LocalDate.of(1991, Month.JUNE, 20), Country.LATVIA),
+                       new Player(5,'Lidia', 33, "onTheBank", LocalDate.of(1988, Month.APRIL, 30), Country.LATVIA)]
     }
 
     @Execution(ExecutionMode.SAME_THREAD)
@@ -306,7 +323,7 @@ class PostgresPlayerDAOSpec extends Specification {
 
         given: 'a flacky dataSource'
         Connection mockedConnection = Mock(Connection) {
-            prepareStatement(_ as String, _ as Integer) >> Mock(PreparedStatement) {
+            prepareStatement(_ as String) >> Mock(PreparedStatement) {
                 executeUpdate() >> {
                     throw new SQLException()
                 }
@@ -320,7 +337,7 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(mockedDataSource, mockedDataSource)
 
         when: 'calling savePlayer with a valid player'
-        postgresPlayerDAO.savePlayer(new Player('richard', 30))
+        postgresPlayerDAO.savePlayer(new Player(1,'Richard', 30, "offender", LocalDate.of(1991, Month.JUNE, 20), Country.LATVIA))
 
         then: 'an exception is thrown from service layer'
         thrown(DatabaseAccessFailed)
@@ -352,7 +369,7 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
         when: 'calling updatePlayer with a name'
-        def result = postgresPlayerDAO.updatePlayer(new Player('lidia', 30), 'lidia')
+        def result = postgresPlayerDAO.updatePlayer(new Player(3,'lidia', 30, "onTheBank", LocalDate.of(1988, Month.APRIL, 30), Country.LATVIA), 'lidia')
 
         then: 'result is successfull'
         result
@@ -372,7 +389,7 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
 
         when: 'calling updatePlayer with a name'
-        def result = postgresPlayerDAO.updatePlayer(new Player('arnold', 30), 'notExisting')
+        def result = postgresPlayerDAO.updatePlayer(new Player(99,'arnold', 33, "onTheBank", LocalDate.of(1988, Month.APRIL, 30), Country.LATVIA), 'notExisting')
 
         then: 'result is NOT successfull'
         !result
@@ -402,10 +419,9 @@ class PostgresPlayerDAOSpec extends Specification {
         def postgresPlayerDAO = new PostgresPlayerDAO(mockedDataSource, mockedDataSource)
 
         when: 'calling savePlayer with a valid player'
-        def success = postgresPlayerDAO.updatePlayer(new Player('richard', 31), 'richard')
+        def success = postgresPlayerDAO.updatePlayer(new Player(1,'Richard', 31, "offender", LocalDate.of(1991, Month.JUNE, 20), Country.LATVIA), 'richard')
 
         then: 'an exception is thrown from service layer'
         thrown(DatabaseAccessFailed)
     }
-
 }

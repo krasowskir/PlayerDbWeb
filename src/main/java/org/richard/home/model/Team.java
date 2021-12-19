@@ -1,8 +1,8 @@
 package org.richard.home.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -21,10 +21,12 @@ public class Team {
     private String website;
     private String owner;
 
+    private JsonNode squad;
+
     public Team() {
     }
 
-    public Team(int id, String name, int budget, byte[] logo, String tla, String address, String phone, String email, String venue, String website, String owner) {
+    public Team(int id, String name, int budget, byte[] logo, String tla, String address, String phone, String email, String venue, String website, String owner, JsonNode squad) {
         this.id = id;
         this.name = name;
         this.budget = budget;
@@ -36,6 +38,7 @@ public class Team {
         this.venue = venue;
         this.website = website;
         this.owner = owner;
+        this.squad = squad;
     }
 
     public int getId() {
@@ -125,6 +128,14 @@ public class Team {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public JsonNode getSquad() {
+        return squad;
+    }
+
+    public void setSquad(JsonNode squad) {
+        this.squad = squad;
     }
 
     @Override

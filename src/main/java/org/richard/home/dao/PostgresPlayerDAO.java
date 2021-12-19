@@ -13,16 +13,18 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 @Component
 public class PostgresPlayerDAO implements PlayerDAO {
     private static final Logger log = LoggerFactory.getLogger(PostgresPlayerDAO.class);
 
-    static String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS WHERE FIRST_NAME = ?";
-    static String PERSIST_PLAYER = "INSERT INTO PLAYERS VALUES (DEFAULT, ?, ?)";
+    static String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS WHERE name = ?";
+    static String PERSIST_PLAYER = "INSERT INTO PLAYERS VALUES (?, ?, ?, ?, ?, ?)";
     static String FIND_PLAYERS_BY_AGE = "SELECT * FROM PLAYERS WHERE ALTER = ?";
-    static String UPDATE_PLAYER = "UPDATE PLAYERS SET FIRST_NAME = ?, ALTER = ? WHERE FIRST_NAME = ?";
+    static String UPDATE_PLAYER = "UPDATE PLAYERS SET name = ?, ALTER = ? WHERE name = ?";
     static String SAVE_PLAYER_LIVES_IN = "INSERT INTO LIVES_IN VALUES (?, ?)";
     static String GET_ALL_PLAYERS = "SELECT P.*, A.* FROM PLAYERS P INNER JOIN LIVES_IN LI ON P.ID = LI.PLAYER_ID INNER JOIN ADDRESSES A ON LI.ADDRESS_ID = A.ID";
 
@@ -96,50 +98,42 @@ public class PostgresPlayerDAO implements PlayerDAO {
         try (Connection con = this.master.getConnection()) {
             log.debug("connection established? : {}", con.isValid(200));
             logWarningsOfConnection(con);
-            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER, Statement.RETURN_GENERATED_KEYS)) {
-                pS.setString(1, toSave.getName());
-                pS.setInt(2, toSave.getAlter());
+            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER)) {
+                pS.setInt(1, toSave.getId());
+                pS.setString(2, toSave.getName());
+                pS.setInt(3, toSave.getAlter());
+                pS.setString(4, toSave.getPosition());
+                pS.setDate(5, Date.valueOf(toSave.getDateOfBirth()));
+                pS.setString(6, toSave.getCountryOfBirth().getValue());
                 log.debug(pS.toString());
-                pS.executeUpdate();
-                try (ResultSet genKeys = pS.getGeneratedKeys()){
-                    if (genKeys.next()){
-                        return genKeys.getInt(1);
-                    } else {
-                        throw new DatabaseAccessFailed("resultSet generatedKeys.next was false");
-                    }
-                }
+                return pS.executeUpdate();
             }
         } catch (SQLException e) {
             log.error(e.getClass().getName());
             log.error(Arrays.toString(e.getStackTrace()));
             throw new DatabaseAccessFailed("database access while savePlayer", e);
         }
-
     }
 
     @Override
-    public Map<String, Integer> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed {
+    public List<Player> savePlayerList(List<Player> toSaveList) throws DatabaseAccessFailed {
         log.debug("savePlayerList withlist size: {}", toSaveList.size());
-        Map<String, Integer> playerNamesWithIds = new HashMap<>();
         try (Connection con = this.master.getConnection()) {
             con.setAutoCommit(false);
             log.debug("connection established? : {}", con.isValid(200));
             logWarningsOfConnection(con);
-            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement pS = con.prepareStatement(PERSIST_PLAYER)) {
                 for (Player player : toSaveList){
                     try {
-                        pS.setString(1, player.getName());
-                        pS.setInt(2, player.getAlter());
+                        pS.setInt(1, player.getId());
+                        pS.setString(2, player.getName());
+                        pS.setInt(3, player.getAlter());
+                        pS.setString(4, player.getPosition());
+                        pS.setDate(5, Date.valueOf(player.getDateOfBirth()));
+                        pS.setString(6, player.getCountryOfBirth().getValue());
                         log.debug(pS.toString());
                         pS.executeUpdate();
                         con.commit();
-                        try (ResultSet genKeys = pS.getGeneratedKeys()){
-                            if (genKeys.next()){
-                                playerNamesWithIds.putIfAbsent(player.getName(),genKeys.getInt(1));
-                            } else {
-                                throw new DatabaseAccessFailed("resultSet generatedKeys.next was false");
-                            }
-                        }
                     } catch (Exception e){
                         log.error(e.getClass().getName());
                         //ignores
@@ -151,7 +145,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
             log.error(Arrays.toString(e.getStackTrace()));
             throw new DatabaseAccessFailed("database access while savePlayer", e);
         }
-        return playerNamesWithIds;
+        return toSaveList;
     }
 
     @Override
@@ -205,7 +199,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
             throw new NotFoundException(String.format("player with name %s not found!", name));
         }
         // FORGOT TO CLOSE THE ResultSet rs!!!
-        Player tmpPlayer = new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+        Player tmpPlayer = new Player(rs.getInt("id"),rs.getString("name"), rs.getInt("ALTER"), rs.getString("position"), rs.getDate("date_of_birth").toLocalDate(),Country.valueOf(rs.getString("country_of_birth").toUpperCase()));
         tmpPlayer.setId(rs.getInt("id"));
         return tmpPlayer;
     }
@@ -217,7 +211,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
         rs.beforeFirst();
         List<Player> playerList = new ArrayList<>();
         while (rs.next()) {
-            Player tmpPl = new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+            Player tmpPl = new Player(rs.getInt("id"),rs.getString("name"), rs.getInt("ALTER"), rs.getString("position"), rs.getDate("date_of_birth").toLocalDate(),Country.valueOf(rs.getString("country_of_birth").toUpperCase()));
             playerList.add(tmpPl);
         }
         return playerList;
@@ -230,7 +224,7 @@ public class PostgresPlayerDAO implements PlayerDAO {
         rs.beforeFirst();
         Map<Player, Address> playersWithAddresses = new HashMap<>();
         while (rs.next()) {
-            Player tmpPl = new Player(rs.getString("FIRST_NAME"), rs.getInt("ALTER"));
+            Player tmpPl = new Player(rs.getInt("id"),rs.getString("name"), rs.getInt("ALTER"), rs.getString("position"), rs.getDate("date_of_birth").toLocalDate(),Country.valueOf(rs.getString("country_of_birth").toUpperCase()));
             tmpPl.setId(rs.getInt("id"));
             Address tmpAddr = new Address(rs.getInt("id"),rs.getString("city"),rs.getString("street"),
                     rs.getString("plz"), Country.valueOf(rs.getString("country")));

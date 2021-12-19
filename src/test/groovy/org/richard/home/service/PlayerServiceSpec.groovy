@@ -5,8 +5,11 @@ import org.richard.home.dao.PlayerDAO
 import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.InvalidInputException
 import org.richard.home.exception.NotFoundException
+import org.richard.home.model.Country
 import org.richard.home.model.Player
 import spock.lang.Specification
+
+import java.time.LocalDate
 
 class PlayerServiceSpec extends Specification {
 
@@ -15,7 +18,7 @@ class PlayerServiceSpec extends Specification {
         given:
         def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
-            1 * getPlayer(_ as String) >> new Player('richard', 30)
+            1 * getPlayer(_ as String) >> new Player(1,'richard', 30, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY)
         }
 
         def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
@@ -66,8 +69,8 @@ class PlayerServiceSpec extends Specification {
         def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO){
             1 * getPlayerByAlter(_ as Integer) >> List.of(
-                    new Player('richard', 30),
-                    new Player('waldemar', 30)
+                    new Player(1,'richard', 30, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY),
+                    new Player(2,'waldemar', 30, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY)
             )
         }
 
@@ -97,7 +100,7 @@ class PlayerServiceSpec extends Specification {
         def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
-        def result = playerService.savePlayer(new Player('richard', 30))
+        def result = playerService.savePlayer(new Player(1,'richard', 30, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY))
 
         then:
         result != 0
@@ -108,7 +111,7 @@ class PlayerServiceSpec extends Specification {
         given:
         def mockedAddressDAO = Mock(AddressDAO.class)
         def mockedPlayerDAO = Mock(PlayerDAO.class){
-            updatePlayer(_, 'lidia') >> new Player('lidia',28)
+            updatePlayer(_, 'lidia') >> new Player(3,'lidia', 28, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY)
             updatePlayer(_, 'NONE') >> {
                 throw new DatabaseAccessFailed()
             }
@@ -117,7 +120,7 @@ class PlayerServiceSpec extends Specification {
         def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
-        def result = playerService.updatePlayer(new Player('lidia', 28), matchedName)
+        def result = playerService.updatePlayer(new Player(3,'lidia', 28, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY), matchedName)
 
         then:
         result == updateResult
@@ -137,7 +140,7 @@ class PlayerServiceSpec extends Specification {
         def playerService = new PlayerService(mockedPlayerDAO, mockedAddressDAO)
 
         when:
-        def result = playerService.savePlayer(new Player('richard', 30))
+        def result = playerService.savePlayer(new Player(1,'richard', 30, 'midfield', LocalDate.of(1991, 6, 20), Country.GERMANY))
 
         then:
         result != 0
