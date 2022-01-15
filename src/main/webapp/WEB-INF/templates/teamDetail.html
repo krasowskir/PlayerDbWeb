@@ -26,7 +26,13 @@
                         </div>
                         <div class="card-body">
                             <h1 class="card-title fw-bold" data-th-text="${{team.name}}"></h1>
-                            <p class="card-text">Sitz: Saebener Straße</p>
+                            <p class="card-text" data-th-text="${{team.address}}" />
+                            <p class="card-text" data-th-text="${{team.address}}" />
+                            <p class="card-text" data-th-text="${{team.tla}}" />
+                            <p class="card-text" data-th-text="${{team.phone}}" />
+                            <p class="card-text" data-th-text="${{team.email}}" />
+                            <p class="card-text" data-th-text="${{team.venue}}" />
+                            <p class="card-text" data-th-text="${{team.website}}" />
                         </div>
                     </div>
 
@@ -40,21 +46,25 @@
                     </aside>
                 </div>
                 <div class="row">
-                    <table class="table table-stripped my-4 col-md-6">
+                    <table class="table table-striped my-4 col-md-6">
                         <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">First</th>
-                            <th scope="col">Last</th>
-                            <th scope="col">Age</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Alter</th>
+                            <th scope="col">Position</th>
+                            <th scope="col">Geburtsdatum</th>
+                            <th scope="col">Geburtland</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Richard</td>
-                            <td>Krasowski</td>
-                            <td>30</td>
+                        <tr data-th-each="elem : ${players}">
+                            <td data-th-text="${{elem.id}}" />
+                            <td data-th-text="${{elem.name}}" />
+                            <td data-th-text="${{elem.alter}}" />
+                            <td data-th-text="${{elem.position}}" />
+                            <td data-th-text="${{elem.dateOfBirth}}" />
+                            <td data-th-text="${{elem.countryOfBirth}}" />
                         </tr>
                         </tbody>
                     </table>

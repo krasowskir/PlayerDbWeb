@@ -4,6 +4,8 @@ import org.richard.home.exception.DatabaseAccessFailed;
 import org.richard.home.model.Address;
 
 public interface AddressDAO {
+    String FIND_ADDRESS_BY_ID = "SELECT * FROM ADDRESSES WHERE ID = ?";
+    String SAVE_ADDRESS = "INSERT INTO ADDRESSES VALUES (default, ?, ?, ?, ?)";
 
     Address getAddress(long id) throws DatabaseAccessFailed;
 

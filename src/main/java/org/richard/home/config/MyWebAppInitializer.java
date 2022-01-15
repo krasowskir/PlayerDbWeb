@@ -36,6 +36,7 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
         playerListOverviewServlet.setTemplateEngine(templateEngine);
         teamDetailServlet.setTemplateEngine(templateEngine);
 
+        //ToDo: add API Documentation to document API endpoints!!! Nobody knows them when they aren't written in DOCS!
         ServletRegistration.Dynamic playerS = servletContext.addServlet("mein", playerServlet);
         playerS.addMapping("/mein");
 

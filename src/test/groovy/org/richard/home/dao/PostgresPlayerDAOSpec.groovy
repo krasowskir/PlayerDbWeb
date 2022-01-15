@@ -2,6 +2,8 @@ package org.richard.home.dao
 
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
+import org.flywaydb.core.internal.jdbc.JdbcTemplate
+import org.flywaydb.core.internal.jdbc.JdbcUtils
 import org.h2.jdbcx.JdbcDataSource
 import org.richard.home.exception.DatabaseAccessFailed
 import org.richard.home.exception.NotFoundException
@@ -20,6 +22,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.sql.Statement
 import java.time.LocalDate
 import java.time.Month
 
@@ -81,7 +84,65 @@ class PostgresPlayerDAOSpec extends Specification {
 
     }
 
-    //works
+    def 'players with address can be fetched'(){
+
+        given:
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+        def playerAddressId
+        def addrId
+
+        and: 'generate a new address'
+        try (def prpStmnt = con.prepareStatement(PostgresAddressDAO.SAVE_ADDRESS, Statement.RETURN_GENERATED_KEYS)){
+            prpStmnt.setString(1, city)
+            prpStmnt.setString(2, street)
+            prpStmnt.setString(3, plz)
+            prpStmnt.setString(4, country)
+
+            prpStmnt.executeUpdate()
+            prpStmnt.connection.commit()
+            try (ResultSet rsGenKeys = prpStmnt.getGeneratedKeys()){
+                if (rsGenKeys.next()){
+                    addrId =  rsGenKeys.getInt(1);
+                } else {throw new SQLException("no id obtained!")}
+            }
+
+        }
+
+        and: 'assign new address to player (id=1)'
+        try (def prpStmntPlayerLivesIn = con.prepareStatement(PostgresPlayerDAO.SAVE_PLAYER_LIVES_IN, Statement.RETURN_GENERATED_KEYS)){
+            prpStmntPlayerLivesIn.setInt(1, 1)
+            prpStmntPlayerLivesIn.setInt(2, addrId)
+            prpStmntPlayerLivesIn.executeUpdate()
+            prpStmntPlayerLivesIn.connection.commit()
+            try (ResultSet rsGenKeys = prpStmntPlayerLivesIn.getGeneratedKeys()){
+                if (rsGenKeys.next()){
+                    playerAddressId = rsGenKeys.getInt(1);
+                } else { throw new SQLException("no id obtained!") }
+            }
+        }
+
+        when: 'calling getAllPlayers'
+        def playerList = postgresPlayerDAO.getAllPlayers()
+
+        then:
+        playerList.size() == 1
+        with(playerList.entrySet()[0]){
+            key.id == playerAddressId
+            key.name == 'richard'
+            key.position == 'offender'
+            key.alter == 30
+
+            value.city == city
+            value.street == street
+            value.plz == plz
+            value.country.getValue() == country
+        }
+
+        where:
+        city    |   street          |   plz       |   country
+        'Berlin'|   'Teststraße'    |   '10707'   |   "GERMANY"
+
+    }
     
 
     @Execution(ExecutionMode.SAME_THREAD)
@@ -232,6 +293,24 @@ class PostgresPlayerDAOSpec extends Specification {
 
         then:'an exception is thrown from service layer'
         thrown(DatabaseAccessFailed)
+    }
+
+    @Execution(ExecutionMode.SAME_THREAD)
+    def 'calling getPlayersFromTeam yields all players beloging to this team'(){
+
+        log.info('calling getPlayersFromTeam yields all players beloging to this team')
+
+        given:
+        def postgresPlayerDAO = new PostgresPlayerDAO(dataSource, dataSource)
+
+        when:
+        List<Player> playerList = postgresPlayerDAO.getPlayersFromTeam(5)
+
+        then:
+        playerList.size() > 10
+        playerList[0].name == 'Serge Gnabry'
+        playerList[0].position == 'Midfielder'
+        playerList[0].alter == 26
     }
 
     @Execution(ExecutionMode.SAME_THREAD)

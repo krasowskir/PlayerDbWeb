@@ -25,9 +25,6 @@ public class PostgresAddressDAO implements AddressDAO {
         return writeDataSource;
     }
 
-    private static String FIND_ADDRESS_BY_ID = "SELECT * FROM ADDRESSES WHERE ID = ?";
-    private static String SAVE_ADDRESS = "INSERT INTO ADDRESSES VALUES (default, ?, ?, ?, ?)";
-
     @Autowired
     public PostgresAddressDAO(@Qualifier("readDataSource") DataSource readOnly, @Qualifier("hikariDataSource") DataSource writeOnly) {
         this.readDataSource = readOnly;

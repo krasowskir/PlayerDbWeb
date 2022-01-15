@@ -1,5 +1,6 @@
 package org.richard.home.servlets;
 
+import org.richard.home.model.Player;
 import org.richard.home.model.dto.PlayerWithAddress;
 import org.richard.home.service.PlayerService;
 import org.slf4j.Logger;
@@ -37,10 +38,10 @@ public class PlayerListOverviewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        List<PlayerWithAddress> playerList = this.playerService.getAllPlayers();
+        List<Player> playerList = this.playerService.getPlayersOfTeam(5);
 
         WebContext context = new WebContext(req, resp, getServletContext());
-        context.setVariable("allPlayers", playerList);
+        context.setVariable("players", playerList);
         resp.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
         templateEngine.process("playerListOverview", context, resp.getWriter());
     }

@@ -21,13 +21,6 @@ import java.util.*;
 public class PostgresPlayerDAO implements PlayerDAO {
     private static final Logger log = LoggerFactory.getLogger(PostgresPlayerDAO.class);
 
-    static String FIND_PLAYER_BY_NAME = "SELECT * FROM PLAYERS WHERE name = ?";
-    static String PERSIST_PLAYER = "INSERT INTO PLAYERS VALUES (?, ?, ?, ?, ?, ?)";
-    static String FIND_PLAYERS_BY_AGE = "SELECT * FROM PLAYERS WHERE ALTER = ?";
-    static String UPDATE_PLAYER = "UPDATE PLAYERS SET name = ?, ALTER = ? WHERE name = ?";
-    static String SAVE_PLAYER_LIVES_IN = "INSERT INTO LIVES_IN VALUES (?, ?)";
-    static String GET_ALL_PLAYERS = "SELECT P.*, A.* FROM PLAYERS P INNER JOIN LIVES_IN LI ON P.ID = LI.PLAYER_ID INNER JOIN ADDRESSES A ON LI.ADDRESS_ID = A.ID";
-
     private DataSource master;
     private DataSource slave;
 
@@ -192,6 +185,21 @@ public class PostgresPlayerDAO implements PlayerDAO {
             throw new DatabaseAccessFailed("database access while savePlayerLivesIn", e);
         }
         return updRows > 0 ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    @Override
+    public List<Player> getPlayersFromTeam(int teamId) throws DatabaseAccessFailed {
+        log.debug("getPlayersFromTeam with teamId {}", teamId);
+        try (Connection con = this.slave.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement(GET_ALL_PLAYERS_FROM_TEAM, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                ps.setInt(1, teamId);
+                ResultSet rs = ps.executeQuery();
+                return mapResultSetToList(rs,0);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
     }
 
     private Player mapResultSetToPlayer(ResultSet rs, String name) throws SQLException {

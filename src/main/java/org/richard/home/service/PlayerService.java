@@ -73,6 +73,17 @@ public class PlayerService {
         return Optional.ofNullable(playerList);
     }
 
+    public List<Player> getPlayersOfTeam(int teamId){
+        try {
+            log.info("entering getPlayersOfTeam");
+            return this.playerDAO.getPlayersFromTeam(teamId);
+        } catch ( DatabaseAccessFailed e) {
+            log.error("exception while fetching the players");
+            return List.of();
+        }
+
+    }
+
     public Player savePlayer(Player toSave) throws DatabaseAccessFailed {
         log.debug("entering savePlayer with player {}", toSave);
         if (toSave == null){

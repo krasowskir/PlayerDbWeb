@@ -4,10 +4,12 @@ This application allows you to create players, teams, addresses and games.
 It allows you to simulate different actions and changes in team constalation and players carreers.
 
 ## Use cases
-- creating players
+- displaying teams/Squads with their players (/teamDetail, /playerListOverview)
+- displaying single players (http://localhost:8080/playerdbweb/mein?player=richard)
+- creating players (curl -i -X POST http://localhost:8080/playerdbweb/mein -H "Content-type: application/json" -d '{"name":"waldemar", "alter": 28 }')
 - adding players to teams
 - creating addresses
-- relocation of the players
+- relocation of the players (/address?playerName=lidia)
 
 ## testing the application
 unit + integration + packaging: ``mvn clean install``

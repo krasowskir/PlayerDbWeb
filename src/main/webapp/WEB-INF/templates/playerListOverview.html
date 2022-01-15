@@ -8,7 +8,7 @@
 </head>
 <body>
     <main class="mx-5 my-5">
-        <div data-th-unless="${#lists.isEmpty(allPlayers)}" class="container-md">
+        <div data-th-unless="${#lists.isEmpty(players)}" class="container-md">
             <div class="row">
                 <h1>Players</h1>
                 <table class="table table-striped">
@@ -16,22 +16,20 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Name</th>
-                            <th scope="col">Age</th>
-                            <th scope="col">Stadt</th>
-                            <th scope="col">Straße</th>
-                            <th scope="col">Plz</th>
-                            <th scope="col">Land</th>
+                            <th scope="col">Alter</th>
+                            <th scope="col">Position</th>
+                            <th scope="col">Geburtsdatum</th>
+                            <th scope="col">Geburtland</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr data-th-each="elem,iter : ${allPlayers}">
-                            <td data-th-text="${{iter.index +1}}" />
+                        <tr data-th-each="elem : ${players}">
+                            <td data-th-text="${{elem.id}}" />
                             <td data-th-text="${{elem.name}}" />
-                            <td data-th-text="${{elem.age}}" />
-                            <td data-th-text="${{elem.city}}" />
-                            <td data-th-text="${{elem.street}}" />
-                            <td data-th-text="${{elem.plz}}" />
-                            <td data-th-text="${{elem.country}}" />
+                            <td data-th-text="${{elem.alter}}" />
+                            <td data-th-text="${{elem.position}}" />
+                            <td data-th-text="${{elem.dateOfBirth}}" />
+                            <td data-th-text="${{elem.countryOfBirth}}" />
                         </tr>
                     </tbody>
                 </table>

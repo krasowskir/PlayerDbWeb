@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import static java.util.Comparator.comparing;
 
+// ToDo: write tests for that!!! Maybe refactor to use DAO layer for persisting players
 public class V4__INSERT_TEAMS extends BaseJavaMigration {
 
     private static final Logger log = LoggerFactory.getLogger(V4__INSERT_TEAMS.class);

@@ -1,6 +1,9 @@
 package org.richard.home.service;
 
+import org.richard.home.dao.PlayerDAO;
 import org.richard.home.dao.TeamDAO;
+import org.richard.home.exception.DatabaseAccessFailed;
+import org.richard.home.model.Player;
 import org.richard.home.model.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,19 +20,34 @@ public class TeamService {
 
     private TeamDAO teamDAO;
 
+    private PlayerDAO playerDAO;
+
     @Autowired
-    public TeamService(TeamDAO teamDAO) {
+    public TeamService(TeamDAO teamDAO, PlayerDAO playerDAO) {
         this.teamDAO = teamDAO;
+        this.playerDAO = playerDAO;
     }
 
     public List<Team> getAllTeams(){
         try {
             log.info("entering getAllTeams");
             List<Team> teams = this.teamDAO.selectAllTeams();
+
             return teams;
         } catch (SQLException e) {
             log.error("exception while fetching the teams");
             return List.of();
         }
+    }
+
+    public List<Player> getPlayersOfTeam(int teamId){
+        try {
+            log.info("entering getPlayersOfTeam");
+            return this.playerDAO.getPlayersFromTeam(teamId);
+        } catch ( DatabaseAccessFailed e) {
+            log.error("exception while fetching the players");
+            return List.of();
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 package org.richard.home.servlets;
 
+import org.richard.home.model.Player;
 import org.richard.home.model.Team;
 import org.richard.home.service.TeamService;
 import org.slf4j.Logger;
@@ -41,10 +42,12 @@ public class TeamDetailServlet extends HttpServlet {
 
         List<Team> foundTeams = teamService.getAllTeams();
         Team bayernMuenchen = foundTeams.get(0);
+        List<Player> players = teamService.getPlayersOfTeam(bayernMuenchen.getId());
         String logoBase64Encoded = "data:image/png;base64, " + Base64.getEncoder().encodeToString(bayernMuenchen.getLogo());
         WebContext context = new WebContext(req, resp, getServletContext());
         context.setVariable("team", bayernMuenchen);
         context.setVariable("logoBase64Encoded", logoBase64Encoded);
+        context.setVariable("players", players);
         resp.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
         templateEngine.process("teamDetail", context, resp.getWriter());
     }
